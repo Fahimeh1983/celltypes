@@ -93,8 +93,11 @@ def Reset_Rename_index(df, name, index_col_name= None):
     Parameters
     ----------
     df: Data frame
-    name: the colname for the index
-    index_col_name: the current name of the index col
+    name: the new colname for the index
+    index_col_name: some times index column has a name which is
+    different than "index", in that case provide the name of the index col as
+    of now
+
     Returns
     -------
     df: data frame with a new column which was previously the index

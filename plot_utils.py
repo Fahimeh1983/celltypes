@@ -1,4 +1,5 @@
 import matplotlib.pylab as plt
+import seaborn as sns
 
 def Plot_3D(xyz, colors, annotation, theta1, theta2, **kwargs):
 
@@ -17,6 +18,7 @@ def Plot_3D(xyz, colors, annotation, theta1, theta2, **kwargs):
     """
 
     plot_size = kwargs.get('plot_size', (20, 20))
+    plot_title = kwargs.get('plot_title', None)
     x_label = kwargs.get('x_label', "x")
 
     fig = plt.figure(figsize= plot_size)
@@ -43,6 +45,9 @@ def Plot_3D(xyz, colors, annotation, theta1, theta2, **kwargs):
 
     if theta1 and theta2 is not None:
         ax.view_init(theta1, theta2)
+
+    if plot_title is not None:
+        ax.set_title(plot_title)
 
     return fig
 
@@ -108,4 +113,47 @@ def Scatter_plot(datasets, datasets_colors, datasets_legends, **kwargs):
     return fig
 
 
+def draw_heatmap(*args, **kwargs):
+    """
+    Takes data frame and then make it an square matrix and plot a heatmap
 
+    Parameters
+    ----------
+    data: a data frame with at least 3 cols
+    index: this is going to be the x axis on the heatmap
+    column: this is going to be the y axis on the heatmap
+    value: this is the weight or color of heatmap
+
+    return
+    --------------------
+    a heatmap
+    """
+    data = kwargs.pop('data')
+    d = data.pivot(index=args[1], columns=args[0], values=args[2])
+    sns.heatmap(d, **kwargs)
+
+def Facet_Grid_Heatmap(data, groupby_col, col_wrap, height, index, column, value):
+    """
+    Takes a data fram, group it based on a column and plot a heatmap for each group
+
+    Parameters
+    ----------
+    data: a data frame with at least 3 cols
+    index: this is going to be the x axis on the heatmap
+    column: this is going to be the y axis on the heatmap
+    value: this is the weight or color of heatmap
+    groupby_col: is the groupby column
+    col_wrap: number of heat map in each row when plotting
+    height: height of each heatmap
+
+    return
+    --------------------
+    a heatmap grid
+    """
+
+    fg = sns.FacetGrid(data, col=groupby_col, col_wrap = col_wrap, height= height)
+    fg.map_dataframe(draw_heatmap, index, column, value, cbar=False, square = True)
+
+    for ax in fg.axes.flat:
+        ax.set_aspect('equal','box')
+    plt.show()
