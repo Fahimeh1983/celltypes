@@ -8,6 +8,8 @@ import pandas as pd
 import csv
 
 
+def _raise_error(msg):
+    raise ValueError("({}) {}".format(type().__name__, msg))
 
 def Read_List_of_Lists_from_CSV(path, filename):
 
@@ -39,8 +41,10 @@ def Write_List_of_Lists_from_CSV(path, filename, file):
     ----------
     path : a path to file
     filename : a string which is basically the filename.
-    object: list of list object to be written into a csv file
 
+    return:
+    ----------
+    list of list
     """
 
     with open(path + filename, "w") as f:

@@ -3,12 +3,106 @@ __author__ = 'Fahimeh Baftizadeh'
 __copyright__ = 'Copyright 2020, Cell type'
 __email__ = 'fahimeh.baftizadeh@gmail.com'
 
+import os
+
 from cell import utils
 import numpy as np
 import pandas as pd
 import networkx as nx
 
-def Graph_from_Weight_Matrix(weight_matrix, threshold, directed):
+from stellargraph import StellarDiGraph, StellarGraph
+
+
+def check_wts(graph, weighted):
+    '''
+    Check the weights of a stellar graph object
+
+    parameters
+    ----------
+    graph: a stellar graph object
+    weighted : True or False
+
+    returns
+    ----------
+
+    '''
+
+    if weighted:
+        # Check that all edge weights are greater than or equal to 0.
+        # Also, if the given graph is a MultiGraph, then check that there are no two edges between
+        # the same two nodes with different weights.
+        for node in graph.nodes():
+            # TODO Encapsulate edge weights
+            for out_neighbor in graph.out_nodes(node):
+
+                wts = set()
+                for weight in graph._edge_weights(node, out_neighbor):
+                    if weight is None or np.isnan(weight) or weight == np.inf:
+                        utils.raise_error(
+                            "Missing or invalid edge weight ({}) between ({}) and ({}).".format(
+                                weight, node, out_neighbor
+                            )
+                        )
+                    if not isinstance(weight, (int, float)):
+                        utils.raise_error(
+                            "Edge weight between nodes ({}) and ({}) is not numeric ({}).".format(
+                                node, out_neighbor, weight
+                            )
+                        )
+                    if weight < 0:  # check if edge has a negative weight
+                        utils.raise_error(
+                            "An edge weight between nodes ({}) and ({}) is negative ({}).".format(
+                                node, out_neighbor, weight
+                            )
+                        )
+
+                    wts.add(weight)
+                if len(wts) > 1:
+                    # multigraph with different weights on edges between same pair of nodes
+                    utils.raise_error(
+                        "({}) and ({}) have multiple edges with weights ({}). Ambiguous to choose an edge for the random walk.".format(
+                            node, out_neighbor, list(wts)
+                        )
+                    )
+    else:
+        utils.raise_error("This check is done only for weighted graphs")
+
+
+
+def Make_stellar_graph(path_to_nodes, path_to_edges, directed):
+    '''
+    Create a Stellar graph object from nodes and edges
+
+    parameters
+    ----------
+    path_to_nodes: is the path to nodes dir. There should be a file names nodes.csv in that dir.
+                    Which has a list of nodes, I think they must be strings
+    path_to_edges : is the path to edges dir. There should be a file named edges.csv in that dir.
+                    The edge file will have 3 columns with the names of "source", "target" and "weight"
+    directed: True or False, if yes then it means that the edges are made from
+              "source" to "target" and not the other way around
+
+    returns
+    ----------
+    Graph object
+    '''
+    nodes_file = os.path.join(path_to_nodes, "nodes.csv")
+    nodes = pd.read_csv(nodes_file, index_col="Unnamed: 0")
+
+    edges_file = os.path.join(path_to_edges, "edges.csv")
+    edges = pd.read_csv(edges_file, index_col="Unnamed: 0")
+
+    if directed:
+        print("Directed graph is made")
+        Gs = StellarDiGraph(nodes, edges)
+    else:
+        print("UN-Directed graph is made")
+        Gs = StellarGraph(nodes, edges)
+
+    return edges
+
+
+def Build_edge_list(weight_matrix, threshold, directed):
     '''
     Takes weight matrix and threshold(optional) and creates a graph(diredted) or non-directed
 
@@ -16,11 +110,12 @@ def Graph_from_Weight_Matrix(weight_matrix, threshold, directed):
     ----------
     weight_matrix : a squared matrix or data frame which has values as weights
     threshold: it must be None if you do not want to threshold the matrix
-    directed : True or False
+    directed: If it is undirected, then it requires only the upper half of the
+              matrix for the edges
 
     returns
     ----------
-    Graph object
+    a data frame of edge lists which has the source, target and weight
     '''
 
     symmetric = utils.Check_Symmetric(weight_matrix)
@@ -28,32 +123,97 @@ def Graph_from_Weight_Matrix(weight_matrix, threshold, directed):
     if threshold is not None:
         weight_matrix = weight_matrix[weight_matrix > threshold]
 
-    if symmetric:
-        print("The weight matrix is symmetric!")
-        print("Upper triangle and diag are used as weights")
-        upper_tri = np.triu(np.ones(weight_matrix.shape), 0).astype(np.bool)
-        node_edge_weight = weight_matrix.where(upper_tri)
-        node_edge_weight = node_edge_weight.stack().reset_index()
-        node_edge_weight.columns = ['node1', 'node2', 'weight']
-
+    if not directed:
+        if not symmetric:
+            print("When undirected, the matrix must be symmetirc")
+            exit()
+        else:
+            print("Upper triangle and diag are used as weights")
+            upper_tri = np.triu(np.ones(weight_matrix.shape), 0).astype(np.bool)
+            node_edge_weight = weight_matrix.where(upper_tri)
+            node_edge_weight = node_edge_weight.stack().reset_index()
+            node_edge_weight.columns = ['source', 'target', 'weight']
     else:
-        print("The weight matrix is non-symmetric!")
+        print("Building a directed graph edge list")
         node_edge_weight = weight_matrix.stack().reset_index()
-        node_edge_weight.columns = ['node1', 'node2', 'weight']
+        node_edge_weight.columns = ['source', 'target', 'weight']
 
-    if symmetric:
-        if directed:
-            raise ValueError('When w is symmetric, you can not make a directed G!')
-        else:
-            G = nx.Graph()
+    return node_edge_weight
 
-    if not symmetric:
-        if not directed:
-            raise ValueError('W is not symmetric, you can not make a non-directed G!')
-        else:
-            G = nx.DiGraph()
 
-    G.add_weighted_edges_from([tuple(x) for x in node_edge_weight.values])
+def get_node_from_edgelist(source_target_weight):
+    """
+    Takes the source target list and return all the nodes exists
+    Returns
+    -------
+
+    """
+    source_list = source_target_weight['source'].tolist()
+    target_list = source_target_weight['target'].tolist()
+
+    for i in target_list:
+        source_list.append(i)
+
+    all_nodes = list(set(source_list))
+    return all_nodes
+
+
+def fix_self_connection(source_target_weight, weighted):
+    '''
+       Takes the source, target, weight data frame and create a graph
+
+       parameters
+       ----------
+       source_target_weight : a dataframe which has the source node, target node and the weight
+       directed : True or False
+
+       returns
+       ----------
+       Graph object
+       '''
+
+    nodes = get_node_from_edgelist(source_target_weight)
+
+    for node in nodes:
+        if source_target_weight[(source_target_weight['source'] == node)
+                                & (source_target_weight['target'] == node)].empty:
+            if weighted:
+                small_w = np.random.random(1) * 10 ** -5
+            else:
+                small_w = 1
+
+            source_target_weight = source_target_weight.append({"source": node,
+                                                                "target": node,
+                                                                "weight": small_w[0]}, ignore_index=True)
+
+    source_target_weight[['source', 'target']] = source_target_weight[['source', 'target']].astype(int)
+
+    return source_target_weight
+
+
+
+
+def Build_nx_Graph(source_target_weight, directed):
+    '''
+    Takes the source, target, weight data frame and create a graph
+
+    parameters
+    ----------
+    source_target_weight : a dataframe which has the source node, target node and the weight
+    directed : True or False
+
+    returns
+    ----------
+    Graph object
+    '''
+
+
+    if directed:
+        G = nx.DiGraph()
+    else:
+        G = nx.Graph()
+
+    G.add_weighted_edges_from([tuple(x) for x in source_target_weight.values])
     return G
 
 

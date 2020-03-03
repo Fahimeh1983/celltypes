@@ -1,8 +1,8 @@
 import matplotlib.pylab as plt
 import seaborn as sns
 
-### Tests### 
-def Plot_3D(xyz, colors, annotation, theta1, theta2, **kwargs):
+
+def Plot_3D(xyz, color, annotation, theta1, theta2, **kwargs):
 
     """
     Plot a rotateable 3d plot
@@ -135,7 +135,7 @@ def draw_heatmap(*args, **kwargs):
 
 def Facet_Grid_Heatmap(data, groupby_col, col_wrap, height, index, column, value):
     """
-    Takes a data fram, group it based on a column and plot a heatmap for each group
+    Takes a data frame, group it based on a column and plot a heatmap for each group
 
     Parameters
     ----------
