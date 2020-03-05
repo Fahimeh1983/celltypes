@@ -506,8 +506,8 @@ def biased_directed_multi_walk(stellar_multi_graph_dict, nodes, layer_importance
                                               begin_checks=False)
 
                 current_node = rw.run(nodes=[previous_node],
-                                      length=length,
-                                      n=n,
+                                      length=2,
+                                      n=1,
                                       p=p,
                                       q=q,
                                       weighted=weighted,
