@@ -2,7 +2,7 @@ import matplotlib.pylab as plt
 import seaborn as sns
 
 
-def Plot_3D(xyz, color, annotation, theta1, theta2, **kwargs):
+def Plot_3D(xyz, annotation_col, **kwargs):
 
     """
     Plot a rotateable 3d plot
@@ -17,7 +17,8 @@ def Plot_3D(xyz, color, annotation, theta1, theta2, **kwargs):
     ax_labels : list of axis labels
     plot_size: tuple of plot sizes
     """
-
+    theta1 = kwargs.get('theta1', None)
+    theta2 = kwargs.get('theta2', None)
     plot_size = kwargs.get('plot_size', (20, 20))
     plot_title = kwargs.get('plot_title', None)
     x_label = kwargs.get('x_label', "x")
@@ -34,8 +35,8 @@ def Plot_3D(xyz, color, annotation, theta1, theta2, **kwargs):
         c = xyz["cluster_color"]
 
     ax.scatter(x, y, z, color=c, s=100)
-    if annotation:
-        for i, txt in enumerate(xyz.index.tolist()):
+    if annotation_col is not None:
+        for i, txt in enumerate(xyz[annotation_col].tolist()):
             ax.text(x[i], y[i], z[i], txt, size=10)
 
     ax_labels = kwargs.get('ax_labels', None)
