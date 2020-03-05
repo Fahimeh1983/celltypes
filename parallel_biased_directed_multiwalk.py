@@ -11,6 +11,8 @@
 import os
 import csv
 import argparse
+import timeit
+import datetime
 
 import pandas as pd
 import cell.BiasedDirectedWeightedWalk as BDWW
@@ -50,7 +52,8 @@ parser.add_argument("--job_id", default=None, type=int, help="will modify the ou
 
 
 def main(edge_path, edge_filename, output_path, walk_filename, n, length, p, q, is_weighted, is_directed, job_id):
-
+    
+    start_time = timeit.default_timer()
     if is_weighted == 1:
         weighted = True
     else:
@@ -108,6 +111,11 @@ def main(edge_path, edge_filename, output_path, walk_filename, n, length, p, q, 
         walk_file_name = walk_filename
     utils.Write_List_of_Lists_from_CSV(output_path, walk_file_name, walks)
 
+    elapsed = timeit.default_timer() - start_time
+
+    print('-------------------------------')
+    print('Training time:', elapsed)
+    print('-------------------------------')
 
 if __name__ == "__main__":
     args = parser.parse_args()
