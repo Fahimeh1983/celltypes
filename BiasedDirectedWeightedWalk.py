@@ -409,6 +409,9 @@ class BiasedDirectedRandomWalk(BeginWalk):
                         out_neighbours = self.out_nodes(current_node)
 
                         if not out_neighbours:
+                            print(node)
+                            raise ValueError("Every node should at least have one outgoing"
+                                             "edge from itself to itself")
                             break
 
                         # select one of the neighbours using the

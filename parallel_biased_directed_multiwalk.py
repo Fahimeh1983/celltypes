@@ -31,6 +31,14 @@ parser.add_argument("--output_path",
                             "graphs/VISp/",
                     type=str,
                     help="where to save the walks")
+parser.add_argument("--edge_filename",
+                    default="myfile.csv",
+                    type=str,
+                    help="the file name which is in the edge path dir and should be read for the edges")
+parser.add_argument("--walk_filename",
+                    default="walk.csv",
+                    type=str,
+                    help="the file name to be used for the output of walk")
 parser.add_argument("--n", default=1, type=int, help="number of walks per node")
 parser.add_argument("--length", default=10, type=int, help="length of each walk")
 parser.add_argument("--p", default=1, type=int, help="p")
@@ -41,7 +49,7 @@ parser.add_argument("--job_id", default=None, type=int, help="will modify the ou
 
 
 
-def main(edge_path, output_path, n, length, p, q, is_weighted, is_directed, job_id):
+def main(edge_path, edge_filename, output_path, walk_filename, n, length, p, q, is_weighted, is_directed, job_id):
 
     if is_weighted == 1:
         weighted = True
@@ -59,11 +67,8 @@ def main(edge_path, output_path, n, length, p, q, is_weighted, is_directed, job_
     node_importance = {}  # keep all the node_importance per layers
 
     for layer in layers:
-        file_name = os.path.join(edge_path, layer, "edges.csv")
+        file_name = os.path.join(edge_path, layer, edge_filename)
         tmp_edge = pd.read_csv(file_name, index_col="Unnamed: 0")
-
-        # 0) for each graph we will add a self connection per node if it is not already there
-        tmp_edge = graph_utils.fix_self_connection(tmp_edge, weighted=True)
         tmp_edge[['source', 'target']] = tmp_edge[['source', 'target']].astype(str)
 
         # 1) for each layer first create a nx-Digraph
@@ -98,9 +103,9 @@ def main(edge_path, output_path, n, length, p, q, is_weighted, is_directed, job_
                                             directed=directed)[0]
 
     if job_id is not None:
-        walk_file_name = "walks_" + str(job_id) + ".csv"
+        walk_file_name = str.split(walk_filename, ".")[0] + "_" + str(job_id) + ".csv"
     else:
-        walk_file_name = "walks.csv"
+        walk_file_name = walk_filename
     utils.Write_List_of_Lists_from_CSV(output_path, walk_file_name, walks)
 
 

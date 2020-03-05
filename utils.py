@@ -47,7 +47,7 @@ def Write_List_of_Lists_from_CSV(path, filename, file):
     list of list
     """
 
-    with open(path + filename, "w") as f:
+    with open(path + "/" + filename, "w") as f:
         writer = csv.writer(f)
         writer.writerows(file)
 
