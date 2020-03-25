@@ -41,3 +41,56 @@ def Linear_regression_model(X, y, test_size, random_state):
     RMSE = np.sqrt(metrics.mean_squared_error(np.array(y_test), y_predict))
 
     return y_test, y_predict, RMSE
+
+def intersection(lst1, lst2):
+
+    """
+    Find intersection of two lists
+
+    Parameters
+    ----------
+    lst1 : first list
+    lst2 : second list
+
+    Returns
+    -------
+    lst3 : a list of intersection values
+
+    """
+
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
+
+def Divide_each_Row_by_colsum(df):
+    """
+    Divide each row by column sum
+
+    Parameters
+    ----------
+    df: Data frame
+
+    Returns
+    -------
+    df_normal: return the column-sum normalized df
+    """
+
+    df_normal = df.div(df.sum(axis=1), axis=0)
+
+    return df_normal
+
+
+
+def Check_Symmetric(a, rtol=1e-05, atol=1e-08):
+
+    """
+    Checks if a matrix is symmetric or not
+
+    Parameters
+    ----------
+    a: a matrix or data frame or numpy array
+
+    returns:
+    ----------
+    TRUE or FALSE
+    """
+    return np.allclose(a, a.T, rtol=rtol, atol=atol)

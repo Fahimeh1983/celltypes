@@ -3,7 +3,7 @@ import pandas as pd
 from cell import utils
 
 
-def summarize_walk_embedding_results(gensim_dict, ndim, cl_df=None):
+def summarize_walk_embedding_results(gensim_dict, index, ndim, cl_df=None):
     """
     Takes a dictionary of gensim word2vec output and make a data frame for more analysis. This can be used
     for only one or for multiple graphs. so if it is only one graph then the dict has only one key
@@ -23,16 +23,14 @@ def summarize_walk_embedding_results(gensim_dict, ndim, cl_df=None):
     data = pd.DataFrame()
 
     for k, v in gensim_dict.items():
-        node_ids = v.wv.index2word  # list of node IDs
-        weighted_node_embeddings = v.wv.vectors  # the embedding vectors
-        columns = ["Z" + str(i) for i in range(ndim)]  # new column names for the embedding vectors
-        emb = pd.DataFrame(weighted_node_embeddings, index=node_ids, columns=columns)  # make a df out of embeddings
-        emb = utils.Reset_Rename_index(emb, name="cluster_id")  # set the cluster_ids or node ids
-        emb['cluster_id'] = emb['cluster_id'].apply(str)
+
+        emb = pd.DataFrame(v, index=index)
+        emb.columns = ["Z" + str(i) for i in range(ndim)]
+        emb.index.name = "cluster_id"
 
         if cl_df is not None:
-            cl_df['cluster_id'] = cl_df['cluster_id'].apply(str)
-            emb = emb.merge(cl_df[["cluster_id", "cluster_color", "cluster_label"]], on="cluster_id")
+            cl_df.index = cl_df.index.astype(str)
+            emb = emb.merge(cl_df, on="cluster_id")
 
         emb['channel_id'] = k
         data = data.append(emb)

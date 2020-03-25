@@ -3,13 +3,113 @@ __author__ = 'Fahimeh Baftizadeh'
 __copyright__ = 'Copyright 2020, Cell type'
 __email__ = 'fahimeh.baftizadeh@gmail.com'
 
-import numpy as np
-import pandas as pd
+import os
 import csv
 
+import numpy as np
+import pandas as pd
+
+from enum import Enum
+
+################################################
+#
+#     Enumerated constant values
+#
+#################################################
+
+class Name(Enum):
+    def __str__(self):
+        return str(self.value)
+
+class ROI(Name):
+    VISp = 'visp'
+    ALM = 'alm'
+
+#################################################
+#
+#     Paths / filenames
+#
+#################################################
+
+def concat_path(*args):
+    """ Join paths together by parts, worry-free """
+    clean = [str(s).strip('/') for s in args]
+    clean = ["/"] + clean
+    return '/'.join(clean)
+
+def get_dir_root():
+    """ For dealing with different netweork locations on Mac/Linux """
+    if os.path.isdir('/Users/fahimehb/Documents/'):
+        network_root = '/Users/fahimehb/Documents/'
+    if os.path.isdir('/allen/programs/celltypes/workgroups/rnaseqanalysis/Fahimehb/'):
+        network_root = '/allen/programs/celltypes/workgroups/rnaseqanalysis/Fahimehb/'
+    if os.path.isdir('/home/pogo/work_dir/'):
+        network_root = '/home/pogo/work_dir/'
+    return network_root
+
+
+def get_all_folder_names(path):
+    output = [dI for dI in os.listdir(path) if os.path.isdir(os.path.join(path, dI))]
+    return output
+
+def get_all_file_names(path):
+    output = os.listdir(path)
+    return output
+
+def get_npp_visp_interaction_mat_path(layer):
+    roi = "VISp"
+    root = get_dir_root()
+    layer_filename = layer + ".csv"
+    path = concat_path(root, "NPP_GNN_project", "dat", "Interaction_mats", roi, layer_filename)
+    print(path)
+    return path
+
+def get_npp_visp_layers():
+    roi = "VISp"
+    root = get_dir_root()
+    path = concat_path(root, "NPP_GNN_project", "dat", "graphs", roi)
+    layers = get_all_folder_names(path)
+    print("listing from:", path)
+    return layers
+
+def get_walk_dir(roi, length, p, q, layer_class, walk_type):
+    root = get_dir_root()
+    walk_dir_name = get_walk_dir_name(length, p, q)
+    path = concat_path(root, "NPP_GNN_project", "dat", "walks", roi, layer_class, walk_type, walk_dir_name)
+    return path
+
+def get_walk_dir_name(length, p, q):
+    return "_".join(("l", str(length), "p", str(p), "q", str(q)))
+
+def get_model_dir(roi, length, p, q, layer_class, walk_type):
+    root = get_dir_root()
+    walk_dir_name = get_walk_dir_name(length, p, q)
+    path = concat_path(root, "NPP_GNN_project", "models", roi, layer_class, walk_type, walk_dir_name)
+    return path
+
+def get_loss_filename(size, iter, window, min_count, sg):
+    filename = "_".join(("size", str(size), "iter", str(iter), "window", str(window), "mincount", str(min_count), "sg",
+                    str(sg)))
+    filename = ".".join((filename, "csv"))
+    return filename
+
+#################################################
+#
+#     Read / writes
+#
+#################################################
+
+def read_visp_npp_cldf():
+    root = get_dir_root()
+    path = concat_path(root, "NPP_GNN_project", "dat", "cl_df_VISp_annotation.csv")
+    cl_df = pd.read_csv(path, index_col="cluster_id")
+    print("Reading cldf from:", path)
+    cl_df.index = cl_df.index.astype(str)
+    return cl_df
 
 def _raise_error(msg):
     raise ValueError("({}) {}".format(type().__name__, msg))
+
 
 def Read_List_of_Lists_from_CSV(path, filename):
 
@@ -32,7 +132,7 @@ def Read_List_of_Lists_from_CSV(path, filename):
 
     return data
 
-def Write_List_of_Lists_from_CSV(path, filename, file):
+def write_list_of_lists_to_csv(path, filename, file):
 
     """
     Write a list of lists to a csv file
@@ -53,43 +153,13 @@ def Write_List_of_Lists_from_CSV(path, filename, file):
 
     return print("Done writing!")
 
-def intersection(lst1, lst2):
+#################################################
+#
+#     file manipulations
+#
+#################################################
 
-    """
-    Find intersection of two lists
-
-    Parameters
-    ----------
-    lst1 : first list
-    lst2 : second list
-
-    Returns
-    -------
-    lst3 : a list of intersection values
-
-    """
-
-    lst3 = [value for value in lst1 if value in lst2]
-    return lst3
-
-def Divide_each_Row_by_colsum(df):
-    """
-    Divide each row by column sum
-
-    Parameters
-    ----------
-    df: Data frame
-
-    Returns
-    -------
-    df_normal: return the column-sum normalized df
-    """
-
-    df_normal = df.div(df.sum(axis=1), axis=0)
-
-    return df_normal
-
-def Reset_Rename_index(df, name, index_col_name= None):
+def reset_rename_index(df, name, index_col_name= None):
 
     """
     set the index to a new column and rename the column
@@ -112,19 +182,3 @@ def Reset_Rename_index(df, name, index_col_name= None):
         df = df.reset_index().rename(columns={"index": name})
 
     return df
-
-def Check_Symmetric(a, rtol=1e-05, atol=1e-08):
-
-    """
-    Checks if a matrix is symmetric or not
-
-    Parameters
-    ----------
-    a: a matrix or data frame or numpy array
-
-    returns:
-    ----------
-    TRUE or FALSE
-    """
-    return np.allclose(a, a.T, rtol=rtol, atol=atol)
-

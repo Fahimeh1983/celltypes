@@ -1,5 +1,12 @@
 import matplotlib.pylab as plt
 import seaborn as sns
+import pandas as pd
+import os
+
+from cell import utils, analysis
+from mpl_toolkits.mplot3d import Axes3D
+
+
 
 
 def Plot_3D(xyz, annotation_col, **kwargs):
@@ -21,9 +28,9 @@ def Plot_3D(xyz, annotation_col, **kwargs):
     theta2 = kwargs.get('theta2', None)
     plot_size = kwargs.get('plot_size', (20, 20))
     plot_title = kwargs.get('plot_title', None)
-    x_label = kwargs.get('x_label', "x")
+    annotation_col = kwargs.get('annotation_col', None)
 
-    fig = plt.figure(figsize= plot_size)
+    fig = plt.figure(figsize=plot_size)
     ax = fig.add_subplot(111, projection='3d')
     x = xyz["Z0"]
     y = xyz["Z1"]
@@ -51,7 +58,7 @@ def Plot_3D(xyz, annotation_col, **kwargs):
     if plot_title is not None:
         ax.set_title(plot_title)
 
-    return fig
+    return ax
 
 
 def Scatter_plot(datasets, datasets_colors, datasets_legends, **kwargs):
@@ -159,3 +166,58 @@ def Facet_Grid_Heatmap(data, groupby_col, col_wrap, height, index, column, value
     for ax in fg.axes.flat:
         ax.set_aspect('equal','box')
     plt.show()
+
+def plot_loss(loss_filename, loss_filedir):
+    """
+
+    Parameters
+    ----------
+    loss_filename
+    loss_filedir
+
+    Returns
+    -------
+
+    """
+    data = pd.read_csv(os.path.join(loss_filedir, loss_filename), header=None)
+    data.columns = ["epochs", "loss"]
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(data["epochs"], data["loss"])
+    plt.xlabel("epochs")
+    plt.ylabel("loss")
+
+    return plt
+
+def plot_embedding(data, plot_dim, **kwargs):
+    """
+
+    Parameters
+    ----------
+    model: the word2vec model trained
+    cl_df: the data frame to read the colors and annotations
+    plot_dim: 2d or 3d plot
+
+    Returns
+    -------
+
+    """
+    plot_size = kwargs.get('plot_size', (10, 10))
+    annotation = kwargs.get('annotation', False)
+
+    fig = plt.figure(figsize=plot_size)
+
+    if plot_dim == 2:
+        ax = fig.add_subplot(111)
+        ax.scatter(data['Z0'], data['Z1'], color=data['cluster_color'], s=30)
+        if annotation:
+            for j, txt in enumerate(data.index.tolist()):
+                ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
+    if plot_dim == 3:
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(data['Z0'], data['Z1'], data["Z2"], color=data['cluster_color'], s=30)
+        if annotation:
+            for j, txt in enumerate(data.index.tolist()):
+                ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
+
+    return ax

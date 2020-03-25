@@ -5,7 +5,7 @@ __email__ = 'fahimeh.baftizadeh@gmail.com'
 
 import os
 
-from cell import utils
+from cell import utils, math_utils
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -102,7 +102,7 @@ def Make_stellar_graph(path_to_nodes, path_to_edges, directed):
     return edges
 
 
-def Build_edge_list(weight_matrix, threshold, directed):
+def build_edge_list(weight_matrix, threshold, directed):
     '''
     Takes weight matrix and threshold(optional) and creates a graph(diredted) or non-directed
 
@@ -118,7 +118,7 @@ def Build_edge_list(weight_matrix, threshold, directed):
     a data frame of edge lists which has the source, target and weight
     '''
 
-    symmetric = utils.Check_Symmetric(weight_matrix)
+    symmetric = math_utils.Check_Symmetric(weight_matrix)
 
     if threshold is not None:
         weight_matrix = weight_matrix[weight_matrix > threshold]
@@ -193,7 +193,7 @@ def fix_self_connection(source_target_weight, weighted):
 
 
 
-def Build_nx_Graph(source_target_weight, directed):
+def build_nx_graph(source_target_weight, directed):
     '''
     Takes the source, target, weight data frame and create a graph
 
