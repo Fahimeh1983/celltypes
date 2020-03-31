@@ -72,19 +72,24 @@ def get_npp_visp_layers():
     print("listing from:", path)
     return layers
 
-def get_walk_dir(roi, length, p, q, layer_class, walk_type):
+def get_walk_dir(roi, project_name, length, p, q, layer_class, walk_type):
     root = get_dir_root()
     walk_dir_name = get_walk_dir_name(length, p, q)
-    path = concat_path(root, "NPP_GNN_project", "dat", "walks", roi, layer_class, walk_type, walk_dir_name)
+    path = concat_path(root, project_name, "dat", "walks", roi, layer_class, walk_type, walk_dir_name)
     return path
 
 def get_walk_dir_name(length, p, q):
     return "_".join(("l", str(length), "p", str(p), "q", str(q)))
 
-def get_model_dir(roi, length, p, q, layer_class, walk_type):
+def get_model_dir(project_name, roi, length, p, q, layer_class, walk_type):
     root = get_dir_root()
     walk_dir_name = get_walk_dir_name(length, p, q)
-    path = concat_path(root, "NPP_GNN_project", "models", roi, layer_class, walk_type, walk_dir_name)
+    path = concat_path(root, project_name, "models", roi, layer_class, walk_type, walk_dir_name)
+    return path
+
+def get_edgelist_dir(roi, layer_class, project_name):
+    root = get_dir_root()
+    path = concat_path(root, project_name, "dat", "edgelists", roi, layer_class)
     return path
 
 def get_loss_filename(size, iter, window, min_count, sg):
@@ -111,7 +116,7 @@ def _raise_error(msg):
     raise ValueError("({}) {}".format(type().__name__, msg))
 
 
-def Read_List_of_Lists_from_CSV(path, filename):
+def read_list_of_lists_from_csv(path, filename):
 
     """
     Read and return a list of lists from a csv file
@@ -126,7 +131,7 @@ def Read_List_of_Lists_from_CSV(path, filename):
     data : a list of lists
     """
 
-    with open(path + filename, 'r') as f:
+    with open(os.path.join(path , filename), 'r') as f:
         reader = csv.reader(f)
         data = list(list(rec) for rec in csv.reader(f, delimiter=','))
 
