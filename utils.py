@@ -43,8 +43,8 @@ def get_dir_root():
         network_root = '/Users/fahimehb/Documents/'
     if os.path.isdir('/allen/programs/celltypes/workgroups/rnaseqanalysis/Fahimehb/'):
         network_root = '/allen/programs/celltypes/workgroups/rnaseqanalysis/Fahimehb/'
-    if os.path.isdir('/home/pogo/work_dir/'):
-        network_root = '/home/pogo/work_dir/'
+    if os.path.isdir('/home/fahimehb/Documents/'):
+        network_root = '/home/fahimehb/Documents/'
     return network_root
 
 
@@ -94,6 +94,13 @@ def get_edgelist_dir(roi, layer_class, project_name):
 
 def get_loss_filename(size, iter, window, min_count, sg):
     filename = "_".join(("size", str(size), "iter", str(iter), "window", str(window), "mincount", str(min_count), "sg",
+                    str(sg)))
+    filename = ".".join((filename, "csv"))
+    return filename
+
+
+def get_emb_filename(size, iter, window, min_count, sg):
+    filename = "_".join(("emb", "size", str(size), "iter", str(iter), "window", str(window), "mincount", str(min_count), "sg",
                     str(sg)))
     filename = ".".join((filename, "csv"))
     return filename
