@@ -43,8 +43,8 @@ def get_dir_root():
         network_root = '/Users/fahimehb/Documents/'
     if os.path.isdir('/allen/programs/celltypes/workgroups/rnaseqanalysis/Fahimehb/'):
         network_root = '/allen/programs/celltypes/workgroups/rnaseqanalysis/Fahimehb/'
-    if os.path.isdir('/home/pogo/Documents/'):
-        network_root = '/home/pogo/Documents/'
+    if os.path.isdir('/home/fahimehb/Documents/'):
+        network_root = '/home/fahimehb/Documents/'
     return network_root
 
 
