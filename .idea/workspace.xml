@@ -2,7 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Word2vec/wv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Deepdive.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Deepdive.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Untitled.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Untitled.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Untitled2.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Untitled3.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/hs_wv_implementation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/hs_wv_implementation.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/word2vec_example_reviews.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/word2vec_example_reviews.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,6 +108,10 @@
       <screen x="1920" y="0" width="1920" height="1200" />
     </state>
     <state x="2294" y="250" key="#com.intellij.execution.impl.EditConfigurationsDialog/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583191490815" />
+    <state x="592" y="233" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1586212287776">
+      <screen x="0" y="23" width="1920" height="977" />
+    </state>
+    <state x="592" y="233" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1920.977@0.23.1920.977" timestamp="1586212287776" />
     <state x="2023" y="358" width="424" height="484" key="FileChooserDialogImpl" timestamp="1582568017633">
       <screen x="1280" y="0" width="1920" height="1200" />
     </state>
