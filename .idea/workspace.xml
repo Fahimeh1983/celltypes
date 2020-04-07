@@ -2,16 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Word2vec/wv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Deepdive.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Deepdive.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/dataloader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Untitled.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Untitled.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Untitled2.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Untitled3.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/hs_wv_implementation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/hs_wv_implementation.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/word2vec_example_reviews.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/word2vec_example_reviews.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
