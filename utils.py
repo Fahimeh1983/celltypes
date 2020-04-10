@@ -61,47 +61,43 @@ def get_npp_visp_interaction_mat_path(layer):
     root = get_dir_root()
     layer_filename = layer + ".csv"
     path = concat_path(root, "NPP_GNN_project", "dat", "Interaction_mats", roi, layer_filename)
-    print(path)
+    # print(path)
     return path
 
 def get_npp_visp_layers():
     roi = "VISp"
     root = get_dir_root()
-    path = concat_path(root, "NPP_GNN_project", "dat", "graphs", roi)
-    layers = get_all_folder_names(path)
-    print("listing from:", path)
+    path = concat_path(root, "NPP_GNN_project", "dat", "layers.csv")
+    layers = pd.read_csv(path)['layers'].tolist()
     return layers
 
-def get_walk_dir(roi, project_name, length, p, q, layer_class, walk_type):
+def get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_type):
     root = get_dir_root()
-    walk_dir_name = get_walk_dir_name(length, p, q)
-    path = concat_path(root, project_name, "dat", "walks", roi, layer_class, walk_type, walk_dir_name)
+    walk_dir_name = get_walk_dir_name(N, length, p, q)
+    path = concat_path(root, project_name, "dat", "walks", roi, layer_class, walk_type, walk_dir_name, layer)
     return path
 
-def get_walk_dir_name(length, p, q):
-    return "_".join(("l", str(length), "p", str(p), "q", str(q)))
+def get_walk_dir_name(N, length, p, q):
+    return "_".join(("N", str(N), "l", str(length), "p", str(p), "q", str(q)))
 
-def get_model_dir(project_name, roi, length, p, q, layer_class, walk_type):
+def get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_type):
     root = get_dir_root()
-    walk_dir_name = get_walk_dir_name(length, p, q)
-    path = concat_path(root, project_name, "models", roi, layer_class, walk_type, walk_dir_name)
+    walk_dir_name = get_walk_dir_name(N, length, p, q)
+    path = concat_path(root, project_name, "models", roi, layer_class, walk_type, walk_dir_name, layer)
     return path
 
-def get_edgelist_dir(roi, layer_class, project_name):
-    root = get_dir_root()
-    path = concat_path(root, project_name, "dat", "edgelists", roi, layer_class)
-    return path
-
-def get_loss_filename(size, iter, window, min_count, sg):
-    filename = "_".join(("size", str(size), "iter", str(iter), "window", str(window), "mincount", str(min_count), "sg",
-                    str(sg)))
+def get_model_name(size, iter, window, lr):
+    filename = "_".join(("model", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr)))
     filename = ".".join((filename, "csv"))
     return filename
 
+def get_edgelist_dir(roi, project_name, layer):
+    root = get_dir_root()
+    path = concat_path(root, project_name, "dat", "edgelists", roi, layer)
+    return path
 
-def get_emb_filename(size, iter, window, min_count, sg):
-    filename = "_".join(("emb", "size", str(size), "iter", str(iter), "window", str(window), "mincount", str(min_count), "sg",
-                    str(sg)))
+def get_loss_filename(size, iter, window, lr):
+    filename = "_".join(("loss", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr)))
     filename = ".".join((filename, "csv"))
     return filename
 
@@ -163,7 +159,21 @@ def write_list_of_lists_to_csv(path, filename, file):
         writer = csv.writer(f)
         writer.writerows(file)
 
-    return print("Done writing!")
+    print("Done writing!")
+
+def write_list_to_csv(path, filename, file):
+    dir = os.path.join(path, filename)
+    with open(dir, 'w') as myfile:
+        wr = csv.writer(myfile)
+        wr.writerow(file)
+    print("Done writing!")
+
+def read_list_from_csv(path, filename):
+    dir = os.path.join(path, filename)
+    with open(dir, 'r') as myfile:
+        reader = csv.reader(myfile)
+        data = list(reader)
+    return data[0]
 
 #################################################
 #

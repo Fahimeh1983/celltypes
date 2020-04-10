@@ -212,12 +212,12 @@ def plot_embedding(data, plot_dim, **kwargs):
         ax.scatter(data['Z0'], data['Z1'], color=data['cluster_color'], s=30)
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
-                ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
+                ax.text(data['Z0'][j], data["Z1"][j], txt, size=10)
     if plot_dim == 3:
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(data['Z0'], data['Z1'], data["Z2"], color=data['cluster_color'], s=30)
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
-                ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
+                ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=5)
 
     return ax

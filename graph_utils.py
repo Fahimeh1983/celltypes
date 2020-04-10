@@ -119,6 +119,8 @@ def build_edge_list(weight_matrix, threshold, directed):
     '''
 
     symmetric = math_utils.Check_Symmetric(weight_matrix)
+    weight_matrix.index = weight_matrix.index.astype(str)
+    weight_matrix.columns = weight_matrix.columns.astype(str)
 
     if threshold is not None:
         weight_matrix = weight_matrix[weight_matrix > threshold]
@@ -133,10 +135,13 @@ def build_edge_list(weight_matrix, threshold, directed):
             node_edge_weight = weight_matrix.where(upper_tri)
             node_edge_weight = node_edge_weight.stack().reset_index()
             node_edge_weight.columns = ['source', 'target', 'weight']
+
+
     else:
         print("Building a directed graph edge list")
         node_edge_weight = weight_matrix.stack().reset_index()
         node_edge_weight.columns = ['source', 'target', 'weight']
+
 
     return node_edge_weight
 
@@ -148,6 +153,8 @@ def get_node_from_edgelist(source_target_weight):
     -------
 
     """
+    source_target_weight[['source', 'target']] = source_target_weight[['source', 'target']].astype(str)
+
     source_list = source_target_weight['source'].tolist()
     target_list = source_target_weight['target'].tolist()
 
@@ -173,6 +180,7 @@ def fix_self_connection(source_target_weight, weighted):
        '''
 
     nodes = get_node_from_edgelist(source_target_weight)
+    source_target_weight[['source', 'target']] = source_target_weight[['source', 'target']].astype(str)
 
     for node in nodes:
         if source_target_weight[(source_target_weight['source'] == node)
@@ -186,7 +194,7 @@ def fix_self_connection(source_target_weight, weighted):
                                                                 "target": node,
                                                                 "weight": small_w[0]}, ignore_index=True)
 
-    source_target_weight[['source', 'target']] = source_target_weight[['source', 'target']].astype(int)
+    source_target_weight[['source', 'target']] = source_target_weight[['source', 'target']].astype(str)
 
     return source_target_weight
 
@@ -262,3 +270,4 @@ def cmdscale(D):
     Y = V.dot(L)
 
     return Y, evals
+
