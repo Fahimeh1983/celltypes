@@ -34,13 +34,13 @@ parser.add_argument("--window", default=None, type=int, help="window size for co
 parser.add_argument("--batch_size", default=None, type=int, help="batch size")
 parser.add_argument("--num_workers", default=1, type=int, help="number of workers for dataloader")
 parser.add_argument("--embedding_size", default=None, type=int, help="embedding_size")
-parser.add_argument("--learning_rate", default=None, type=int, help="learning_rate")
+parser.add_argument("--learning_rate", default=None, type=float, help="learning_rate")
 parser.add_argument("--n_epochs", default=1, type=int, help="n_epochs")
 
 
 
 def main(N, length, p, q, walk_filename, roi, project_name, layer_class, layer, walk_type, window, batch_size,
-         num_workers, embedding_size, learning_rate, n_epochs, job_id):
+         num_workers, embedding_size, learning_rate, n_epochs):
 
     walk_dir = utils.get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_type)
 
