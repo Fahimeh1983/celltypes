@@ -1,3 +1,9 @@
+#to run:
+#python -m trainer --N 1 --length 10000 --p 1 --q 1 --walk_filename "walk_0.csv" --roi "VISp"
+# --project_name "NPP_GNN_project"  --layer_class "single_layer" --layer "base_unnormalized_allcombined"
+# --walk_type "Directed_Weighted_node2vec" --window window --batch_size batch_size --num_workers num_workers
+# --embedding_size embedding_size  --learning_rate learning_rate --n_epochs n_epochs
+
 
 import os
 import time
@@ -24,7 +30,6 @@ parser.add_argument("--project_name", default=None, type=str, help="name of the 
 parser.add_argument("--layer_class", default=None, type=str, help="layer class, e.g single_layer")
 parser.add_argument("--layer", default=None, type=str, help="layer name e.g base_unnormalized_allcombined")
 parser.add_argument("--walk_type", default=None, type=str, help="e.g Directed_Weighted_node2vec")
-parser.add_argument("--job_id", default=None, type=int, help="will modify the output walk file name")
 parser.add_argument("--window", default=None, type=int, help="window size for contex-tuple pair")
 parser.add_argument("--batch_size", default=None, type=int, help="batch size")
 parser.add_argument("--num_workers", default=1, type=int, help="number of workers for dataloader")
