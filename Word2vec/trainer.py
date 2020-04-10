@@ -17,8 +17,6 @@ import torch.nn as nn
 from cell import utils, analysis
 from cell.Word2vec import prepare_vocab, dataloader, wv
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--IO_files", default="IO_path.csv", type=str, help="IO path")
 parser.add_argument("--window", default=None, type=int, help="window size for contex-tuple pair")
@@ -27,10 +25,15 @@ parser.add_argument("--num_workers", default=1, type=int, help="number of worker
 parser.add_argument("--embedding_size", default=None, type=int, help="embedding_size")
 parser.add_argument("--learning_rate", default=None, type=float, help="learning_rate")
 parser.add_argument("--n_epochs", default=1, type=int, help="n_epochs")
+parser.add_argument("--gpu_device", default=None, type=str, help="name of the gpu. e.g cuda:0")
 
 
 
-def main(IO_files, window, batch_size, num_workers, embedding_size, learning_rate, n_epochs):
+
+def main(IO_files, window, batch_size, num_workers, embedding_size, learning_rate, n_epochs, gpu_device):
+
+    #gpu config
+    device = torch.device(gpu_device if torch.cuda.is_available() else 'cpu')
 
     pwd = os.path.dirname(os.path.realpath(__file__))
     walk_path, model_path, loss_path = utils.read_list_from_csv(pwd, IO_files)
@@ -86,16 +89,11 @@ def main(IO_files, window, batch_size, num_workers, embedding_size, learning_rat
     print("Done!")
 
     #save embedding and loss
-    vectors = model.embeddings.weight.detach().numpy()
+    vectors = model.embeddings.weight.detach().cpu().numpy()
     data = analysis.summarize_walk_embedding_results(gensim_dict={"model": vectors},
                                                      index=index_2_word.values(),
                                                      ndim=embedding_size)
 
-    #model_dir = utils.get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_type)
-
-    #model_name = utils.get_model_name(embedding_size, n_epochs, window, learning_rate)
-
-    #loss_name = utils.get_loss_filename(embedding_size, n_epochs, window, learning_rate)
 
     data.to_csv(model_path)
 
