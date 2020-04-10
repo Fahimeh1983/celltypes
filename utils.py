@@ -86,8 +86,9 @@ def get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_t
     path = concat_path(root, project_name, "models", roi, layer_class, walk_type, walk_dir_name, layer)
     return path
 
-def get_model_name(size, iter, window, lr):
-    filename = "_".join(("model", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr)))
+def get_model_name(size, iter, window, lr, batch_size):
+    filename = "_".join(("model", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr),
+                        "bs", str(batch_size)))
     filename = ".".join((filename, "csv"))
     return filename
 
@@ -96,8 +97,9 @@ def get_edgelist_dir(roi, project_name, layer):
     path = concat_path(root, project_name, "dat", "edgelists", roi, layer)
     return path
 
-def get_loss_filename(size, iter, window, lr):
-    filename = "_".join(("loss", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr)))
+def get_loss_filename(size, iter, window, lr, batch_size):
+    filename = "_".join(("loss", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr),
+                         "bs", str(batch_size)))
     filename = ".".join((filename, "csv"))
     return filename
 
@@ -119,7 +121,7 @@ def _raise_error(msg):
     raise ValueError("({}) {}".format(type().__name__, msg))
 
 
-def read_list_of_lists_from_csv(path, filename):
+def read_list_of_lists_from_csv(path):
 
     """
     Read and return a list of lists from a csv file
@@ -134,7 +136,7 @@ def read_list_of_lists_from_csv(path, filename):
     data : a list of lists
     """
 
-    with open(os.path.join(path , filename), 'r') as f:
+    with open(path , 'r') as f:
         reader = csv.reader(f)
         data = list(list(rec) for rec in csv.reader(f, delimiter=','))
 
@@ -161,9 +163,8 @@ def write_list_of_lists_to_csv(path, filename, file):
 
     print("Done writing!")
 
-def write_list_to_csv(path, filename, file):
-    dir = os.path.join(path, filename)
-    with open(dir, 'w') as myfile:
+def write_list_to_csv(path, file):
+    with open(path, 'w') as myfile:
         wr = csv.writer(myfile)
         wr.writerow(file)
     print("Done writing!")

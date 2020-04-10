@@ -20,16 +20,7 @@ from cell.Word2vec import prepare_vocab, dataloader, wv
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--N", default=0, type=int, help="number of walks per node")
-parser.add_argument("--length", default=0, type=int, help="length of each walk")
-parser.add_argument("--p", default=1, type=int, help="p")
-parser.add_argument("--q", default=1, type=int, help="q")
-parser.add_argument("--walk_filename", default=None, type=str, help="the file name to be used for the input")
-parser.add_argument("--roi", default="VISp", type=str, help="region of interest")
-parser.add_argument("--project_name", default=None, type=str, help="name of the project")
-parser.add_argument("--layer_class", default=None, type=str, help="layer class, e.g single_layer")
-parser.add_argument("--layer", default=None, type=str, help="layer name e.g base_unnormalized_allcombined")
-parser.add_argument("--walk_type", default=None, type=str, help="e.g Directed_Weighted_node2vec")
+parser.add_argument("--IO_files", default="IO_path.csv", type=str, help="IO path")
 parser.add_argument("--window", default=None, type=int, help="window size for contex-tuple pair")
 parser.add_argument("--batch_size", default=None, type=int, help="batch size")
 parser.add_argument("--num_workers", default=1, type=int, help="number of workers for dataloader")
@@ -39,13 +30,14 @@ parser.add_argument("--n_epochs", default=1, type=int, help="n_epochs")
 
 
 
-def main(N, length, p, q, walk_filename, roi, project_name, layer_class, layer, walk_type, window, batch_size,
-         num_workers, embedding_size, learning_rate, n_epochs):
+def main(IO_files, window, batch_size, num_workers, embedding_size, learning_rate, n_epochs):
 
-    walk_dir = utils.get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_type)
+    pwd = os.path.dirname(os.path.realpath(__file__))
+    walk_path, model_path, loss_path = utils.read_list_from_csv(pwd, IO_files)
+    #walk_dir = utils.get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_type)
 
     #prepare vocabulary
-    corpus = utils.read_list_of_lists_from_csv(walk_dir, walk_filename)
+    corpus = utils.read_list_of_lists_from_csv(walk_path)
     vocabulary = prepare_vocab.get_vocabulary(corpus)
     print(f'length of vocabulary: {len(vocabulary)}')
     word_2_index = prepare_vocab.get_word2idx(vocabulary)
@@ -99,15 +91,15 @@ def main(N, length, p, q, walk_filename, roi, project_name, layer_class, layer, 
                                                      index=index_2_word.values(),
                                                      ndim=embedding_size)
 
-    model_dir = utils.get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_type)
+    #model_dir = utils.get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_type)
 
-    model_name = utils.get_model_name(embedding_size, n_epochs, window, learning_rate)
+    #model_name = utils.get_model_name(embedding_size, n_epochs, window, learning_rate)
 
-    loss_name = utils.get_loss_filename(embedding_size, n_epochs, window, learning_rate)
+    #loss_name = utils.get_loss_filename(embedding_size, n_epochs, window, learning_rate)
 
-    data.to_csv(os.path.join(model_dir, model_name))
+    data.to_csv(model_path)
 
-    utils.write_list_to_csv(model_dir, loss_name, training_loss)
+    utils.write_list_to_csv(loss_path, training_loss)
 
     elapsed = timeit.default_timer() - start_time
 
