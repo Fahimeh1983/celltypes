@@ -146,7 +146,7 @@ def read_list_of_lists_from_csv(path):
 
     return data
 
-def write_list_of_lists_to_csv(path, filename, file):
+def write_list_of_lists_to_csv(path, file):
 
     """
     Write a list of lists to a csv file
@@ -161,7 +161,7 @@ def write_list_of_lists_to_csv(path, filename, file):
     list of list
     """
 
-    with open(path + "/" + filename, "w") as f:
+    with open(path, "w") as f:
         writer = csv.writer(f)
         writer.writerows(file)
 
@@ -173,9 +173,8 @@ def write_list_to_csv(path, file):
         wr.writerow(file)
     print("Done writing!")
 
-def read_list_from_csv(path, filename):
-    dir = os.path.join(path, filename)
-    with open(dir, 'r') as myfile:
+def read_list_from_csv(path):
+    with open(path, 'r') as myfile:
         reader = csv.reader(myfile)
         data = list(reader)
     return data[0]
