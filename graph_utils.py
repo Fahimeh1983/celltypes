@@ -145,6 +145,19 @@ def build_edge_list(weight_matrix, threshold, directed):
 
     return node_edge_weight
 
+def remove_nodes_from_edglist(edgelist, node_list):
+    '''
+
+    Parameters
+    ----------
+    edgelist
+    node_list: a list of nodes to be removed
+
+    Returns
+    -------
+    '''
+    return edgelist[(~edgelist.source.isin(node_list)) & (~edgelist.target.isin(node_list))]
+
 
 def get_node_from_edgelist(source_target_weight):
     """

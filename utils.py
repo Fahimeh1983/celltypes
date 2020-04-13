@@ -86,9 +86,11 @@ def get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_t
     path = concat_path(root, project_name, "models", roi, layer_class, walk_type, walk_dir_name, layer)
     return path
 
-def get_model_name(size, iter, window, lr, batch_size):
+def get_model_name(size, iter, window, lr, batch_size, opt_add):
     filename = "_".join(("model", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr),
                         "bs", str(batch_size)))
+    if opt_add:
+        filename = "_".join((filename, opt_add))
     filename = ".".join((filename, "csv"))
     return filename
 
@@ -97,9 +99,11 @@ def get_edgelist_dir(roi, project_name, layer):
     path = concat_path(root, project_name, "dat", "edgelists", roi, layer)
     return path
 
-def get_loss_filename(size, iter, window, lr, batch_size):
+def get_loss_filename(size, iter, window, lr, batch_size, opt_add):
     filename = "_".join(("loss", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr),
                          "bs", str(batch_size)))
+    if opt_add:
+        filename = "_".join((filename, opt_add))
     filename = ".".join((filename, "csv"))
     return filename
 
