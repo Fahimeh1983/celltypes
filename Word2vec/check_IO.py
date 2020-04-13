@@ -18,9 +18,11 @@ parser.add_argument("--batch_size", default=None, type=int, help="batch size")
 parser.add_argument("--embedding_size", default=None, type=int, help="embedding_size")
 parser.add_argument("--learning_rate", default=None, type=float, help="learning_rate")
 parser.add_argument("--n_epochs", default=1, type=int, help="n_epochs")
+parser.add_argument("--opt_add", default=None, type=str, help="an additive name for loss and model file name")
+
 
 def main(N, length, p, q, walk_filename, roi, project_name, layer_class, layer, walk_type, window, batch_size,
-         embedding_size, learning_rate, n_epochs):
+         embedding_size, learning_rate, n_epochs, opt_add):
 
     walk_dir = utils.get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_type)
     walk_path = os.path.join(walk_dir, walk_filename)
@@ -43,7 +45,7 @@ def main(N, length, p, q, walk_filename, roi, project_name, layer_class, layer, 
         print(model_dir)
         print("_______________________________________________________")
 
-    model_name = utils.get_model_name(embedding_size, n_epochs, window, learning_rate, batch_size)
+    model_name = utils.get_model_name(embedding_size, n_epochs, window, learning_rate, batch_size, opt_add)
     model_path = os.path.join(model_dir, model_name)
 
     if os.path.isfile(model_path):
@@ -54,7 +56,7 @@ def main(N, length, p, q, walk_filename, roi, project_name, layer_class, layer, 
         print(model_path)
         print("_______________________________________________________")
 
-    loss_name = utils.get_loss_filename(embedding_size, n_epochs, window, learning_rate, batch_size)
+    loss_name = utils.get_loss_filename(embedding_size, n_epochs, window, learning_rate, batch_size, opt_add)
     loss_path = os.path.join(model_dir, loss_name)
 
     if os.path.isfile(loss_path):
