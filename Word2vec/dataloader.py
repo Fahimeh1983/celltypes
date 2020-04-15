@@ -24,7 +24,6 @@ class MCBOW_WalkDataset(Dataset):
             self.context_list.append([wd_2_idx[j] for j in l])
 
         self.context_list = torch.from_numpy(np.array(self.context_list))
-
         self.n_samples = len(word_context_tuples_list)
 
     def __getitem__(self, index):

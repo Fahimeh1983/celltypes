@@ -220,4 +220,11 @@ def plot_embedding(data, plot_dim, **kwargs):
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
 
+    for tick in ax.xaxis.get_majorticklabels():  # example for xaxis
+        tick.set_fontsize(12)
+
+    for tick in ax.yaxis.get_majorticklabels():  # example for xaxis
+        tick.set_fontsize(12)
+
+
     return fig

@@ -31,11 +31,12 @@ def get_idx2word(vocabulary, padding=False):
 
     idx2word = {}
     if padding:
+        print("a node called pad is added for padding and its index is zero")
         idx2word[0] = 'pad'
         for idx, w in enumerate(vocabulary):
             idx2word[idx+1] = w
     else:
-        idx2word =  {idx: w for (idx, w) in enumerate(vocabulary)}
+        idx2word = {idx: w for (idx, w) in enumerate(vocabulary)}
 
     return idx2word
 
@@ -55,6 +56,7 @@ def get_word2idx(vocabulary, padding=False):
     word2idx = {}
     if padding:
         word2idx['pad'] = 0
+        print("a node called pad is added for padding and its index is zero")
         for idx, w in enumerate(vocabulary):
             word2idx[w] = idx + 1
     else:
@@ -76,6 +78,7 @@ def get_word_context_tuples(corpus, window):
     context_tuple_list: a list of tuples which the first member of the tuple is the word and the second
     member in the tuple is the context
     '''
+
     context_tuple_list = []
 
     for text in corpus:
@@ -101,6 +104,7 @@ def MCBOW_get_word_context_tuples(corpus, window):
     context_tuple_list: a list of tuples which the first member of the tuple is the word and the second
     member in the tuple is the context
     '''
+    print("MCBOW by default adds a padding node called pad with index zero")
     context_tuple_list = []
 
     for text in corpus:

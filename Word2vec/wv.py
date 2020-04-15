@@ -18,6 +18,7 @@ class MCBOW_Word2Vec(nn.Module):
 
     def __init__(self, embedding_size, vocab_size):
         super(MCBOW_Word2Vec, self).__init__()
+        print("the index2word and word2index dicts must have padding with index zero")
         self.embeddings = nn.Embedding(vocab_size, embedding_size, padding_idx=0)
         self.linear = nn.Linear(embedding_size, vocab_size)
 

@@ -5,10 +5,12 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Word2vec/dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/dataloader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Word2vec/wv.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/wv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Debug_loss.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Debug_loss.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_tutorial.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_tutorial.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/.ipynb_checkpoints/Debug_loss-checkpoint.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Debug_loss.ipynb" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -162,5 +164,9 @@
       <screen x="0" y="23" width="1440" height="797" />
     </state>
     <state x="397" y="254" key="com.intellij.ide.util.TipDialog/0.23.1440.797@0.23.1440.797" timestamp="1579815376912" />
+    <state x="385" y="144" width="670" height="676" key="search.everywhere.popup" timestamp="1586989771654">
+      <screen x="0" y="23" width="1440" height="797" />
+    </state>
+    <state x="385" y="144" width="670" height="676" key="search.everywhere.popup/0.23.1440.797@0.23.1440.797" timestamp="1586989771654" />
   </component>
 </project>
