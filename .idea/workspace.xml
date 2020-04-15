@@ -3,11 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/AE.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/AutoE.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/wv.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/wv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Debug_loss.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Debug_loss.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_tutorial.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_tutorial.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/hs_wv_implementation.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
