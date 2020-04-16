@@ -39,15 +39,16 @@ def main(IO_files, window, batch_size, num_workers, embedding_size, learning_rat
     device = torch.device(gpu_device if torch.cuda.is_available() else 'cpu')
 
     pwd = os.path.dirname(os.path.realpath(__file__))
-    walk_path, model_path, loss_path = utils.read_list_from_csv(pwd, IO_files)
+    IO_file_path=os.path.join(pwd, IO_files)
+    walk_path, model_path, loss_path = utils.read_list_from_csv(IO_file_path)
     #walk_dir = utils.get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_type)
 
     #prepare vocabulary
     corpus = utils.read_list_of_lists_from_csv(walk_path)
     vocabulary = prepare_vocab.get_vocabulary(corpus)
     print(f'length of vocabulary: {len(vocabulary)}')
-    word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=padding)
-    index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=padding)
+    word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=MCBOW)
+    index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=MCBOW)
 
     #prepare context-word pairs and data loader
     if MCBOW:
