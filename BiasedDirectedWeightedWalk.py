@@ -369,8 +369,6 @@ class BiasedDirectedRandomWalk(BeginWalk):
             self._raise_error(
                 "You think that you have a directed graph but it is not")
 
-
-
         ip = 1.0 / p
         iq = 1.0 / q
 
@@ -385,7 +383,7 @@ class BiasedDirectedRandomWalk(BeginWalk):
                 previous_node = node
                 previous_node_neighbours = out_neighbours
 
-                # calculate the appropriate unnormalised transition
+                # calculate the appropriate un-normalised transition
                 # probability, given the history of the walk
                 def transition_probability(nn, current_node, weighted):
 

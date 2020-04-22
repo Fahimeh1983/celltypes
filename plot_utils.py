@@ -1,15 +1,9 @@
 import matplotlib.pylab as plt
+from mpl_toolkits import mplot3d
 import seaborn as sns
 import pandas as pd
-import os
 
-from cell import utils, analysis
-from mpl_toolkits.mplot3d import Axes3D
-
-
-
-
-def Plot_3D(xyz, annotation_col, **kwargs):
+def Plot_3D(xyz, **kwargs):
 
     """
     Plot a rotateable 3d plot
@@ -61,63 +55,48 @@ def Plot_3D(xyz, annotation_col, **kwargs):
     return ax
 
 
-def Scatter_plot(datasets, datasets_colors, datasets_legends, **kwargs):
+def MScatter_plot(datasets, plot_dim=2, **kwargs):
 
     """
     Takes multiple datasets and scatter plot each of them
 
     Parameters
     ----------
-    figsize: size of the figure
     datasets: a dict of dataframes, each of the dataframes going to be a scatter plot
-    datasets_colors: a dict of colors (one color per dataframe)
-    datasets_legends: a dict of legends (one legend per dataframe)
+    plot_dim: number of dimensions to plot (2 or 3)
 
     Optional parameters
     --------------------
-    figsize:  a tuple of fig size
-    x_label: label of x axis
-    y_label: label of y axis
-    xticks: a list of numbers for the xtick locations
-    xtick_labels: a list of xtick labels
-    ytick: a list of numbers for the yticks locations
-    ytick_labels : a list of y tick labels
-    xticl_label_rotation: rotation angel for xtick labels
-    ytick_label_rotation: rotation angle for ytick labels
-    legend_loc : location of legend
+    fig_size:  a tuple of fig size
+    dataset_color_colname: the column to read the color of each point
+    hspace : horizontal space between subplots
+    wspace : width space between subplots
+    scatter_point_size: scatter point size
     """
 
-    figsize = kwargs.get('figsize', (10, 10))
-    x_label = kwargs.get('x_label', "x")
-    y_label = kwargs.get('y_label', "y")
-    legend_loc = kwargs.get('legend_loc', "upper left")
-    xtick_labels = kwargs.get('xtick_labels', None)
-    ytick_labels = kwargs.get('ytick_labels', None)
-    xtick_label_rotation = kwargs.get('xtick_label_rotation', None)
-    ytick_label_rotation = kwargs.get('ytick_label_rotation', None)
-    plot_line = kwargs.get('plot_line', True)
+    fig_size = kwargs.get('fig_size', (10, len(datasets)*10))
+    dataset_color_colname = kwargs.get('dataset_color_colname', 'cluster_color')
+    hspace = kwargs.get('hspace', 0.5)
+    wspace = kwargs.get('wspace', 0.5)
+    scatter_point_size = kwargs.get('scatter_point_size', 10)
 
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111)
 
+    fig = plt.figure(figsize=fig_size)
+    i = 1
     for k, v in datasets.items():
-        ax.scatter(v['x'], v['y'], s=10, c=datasets_colors[k], label=datasets_legends[k])
-        if plot_line:
-            ax.plot(v['x'], v['y'], c=datasets_colors[k])
+        if plot_dim == 3:
+            ax = fig.add_subplot(15, 3, i, projection="3d")
+            if dataset_color_colname:
+                ax.scatter(v['Z0'], v['Z1'], v['Z2'], c=v[dataset_color_colname], s=scatter_point_size)
 
-    plt.legend(loc=legend_loc)
-    ax.set_ylabel(y_label)
-    ax.set_xlabel(x_label)
+        else:
+            ax = fig.add_subplot(15, 3, i)
+            if dataset_color_colname:
+                ax.scatter(v['Z0'], v['Z1'], c=v[dataset_color_colname], s=scatter_point_size)
 
-    if xtick_labels is not None:
-        xticks = kwargs.get('xticks', None)
-        ax.set_xticks(xticks)
-        ax.set_xticklabels(xtick_labels, rotation=xtick_label_rotation)
-
-    if ytick_labels is not None:
-        yticks = kwargs.get('yticks', None)
-        ax.set_xticks(yticks)
-        ax.set_xticklabels(ytick_labels, rotation=ytick_label_rotation)
+        ax.set_title(k)
+        plt.subplots_adjust(hspace=hspace, wspace=wspace)
+        i += 1
 
     return fig
 
@@ -167,7 +146,7 @@ def Facet_Grid_Heatmap(data, groupby_col, col_wrap, height, index, column, value
         ax.set_aspect('equal','box')
     plt.show()
 
-def plot_loss(loss_filename, loss_filedir):
+def plot_loss(loss_filepath):
     """
 
     Parameters
@@ -179,7 +158,7 @@ def plot_loss(loss_filename, loss_filedir):
     -------
 
     """
-    data = pd.read_csv(os.path.join(loss_filedir, loss_filename), header=None)
+    data = pd.read_csv(loss_filepath, header=None)
     data.columns = ["epochs", "loss"]
 
     plt.figure(figsize=(10, 5))
@@ -195,8 +174,9 @@ def plot_embedding(data, plot_dim, **kwargs):
     Parameters
     ----------
     model: the word2vec model trained
-    cl_df: the data frame to read the colors and annotations
     plot_dim: 2d or 3d plot
+    scatter_point_size(optional): size of the scatter points
+    annotation: if True, it will use the indexes for annotation
 
     Returns
     -------
@@ -204,18 +184,19 @@ def plot_embedding(data, plot_dim, **kwargs):
     """
     plot_size = kwargs.get('plot_size', (10, 10))
     annotation = kwargs.get('annotation', False)
+    scatter_point_size = kwargs.get('scatter_point_size', 40)
 
     fig = plt.figure(figsize=plot_size)
 
     if plot_dim == 2:
         ax = fig.add_subplot(111)
-        ax.scatter(data['Z0'], data['Z1'], color=data['cluster_color'], s=40)
+        ax.scatter(data['Z0'], data['Z1'], color=data['cluster_color'], s=scatter_point_size)
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], txt, size=10)
     if plot_dim == 3:
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(data['Z0'], data['Z1'], data["Z2"], color=data['cluster_color'], s=40)
+        ax.scatter(data['Z0'], data['Z1'], data["Z2"], color=data['cluster_color'], s=scatter_point_size)
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)

@@ -78,11 +78,18 @@ def get_walk_dir(roi, project_name, N, length, p, q, layer_class, layer, walk_ty
     return path
 
 def get_walk_dir_name(N, length, p, q):
+
     if p % 1 == 0:
-       p = int(p)
+        p = str(int(p))
+    else:
+        p = f"{p:f}"
+
     if q % 1 == 0:
-       q = int(q)
-    return "_".join(("N", str(N), "l", str(length), "p", str(p), "q", str(q)))
+        q = str(int(q))
+    else:
+        q = f"{q:f}"
+
+    return "_".join(("N", str(N), "l", str(length), "p", p, "q", q))
 
 def get_model_dir(project_name, roi, N, length, p, q, layer_class, layer, walk_type):
     root = get_dir_root()
