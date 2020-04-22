@@ -20,8 +20,8 @@ class MCBOW_Word2Vec(nn.Module):
         super(MCBOW_Word2Vec, self).__init__()
         print("the index2word and word2index dicts must have padding with index zero")
         self.embeddings = nn.Embedding(vocab_size, embedding_size, padding_idx=0)
-        self.linear = nn.Linear(embedding_size, vocab_size)
         self.batch_norm = torch.nn.BatchNorm1d(embedding_size, eps=1e-10, momentum=0.1, affine=False)
+        self.linear = nn.Linear(embedding_size, vocab_size)
 
         # context.size : (batch_size, window * 2)
         # self.embedding(context_words).size : (batch_size, window * 2, vocab_size) e.g. [2000, 4, 93]
@@ -29,7 +29,7 @@ class MCBOW_Word2Vec(nn.Module):
 
     def forward(self, context_words):
         out = torch.mean(self.embeddings(context_words), dim=1)
-        out = self.linear(self.batch_norm(out))
+        out = self.batch_norm(out)
         out = self.linear(out)
 
         return out
