@@ -24,8 +24,8 @@ nodes = list(sdg.nodes())
 walks = rw.run(nodes=nodes,
                length=10,
                n=1,
-               p=1,
-               q=1,
+               p=1000000,
+               q=0.000001,
                weighted=True,
                directed=True)
 print(walks)

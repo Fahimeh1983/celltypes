@@ -2,7 +2,6 @@ import torch.nn  as  nn
 import torch
 
 class Word2Vec(nn.Module):
-
     def __init__(self, embedding_size, vocab_size):
         super(Word2Vec, self).__init__()
         self.embeddings = nn.Embedding(vocab_size, embedding_size)

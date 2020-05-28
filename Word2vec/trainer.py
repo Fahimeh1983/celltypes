@@ -88,11 +88,11 @@ def main(IO_files, window, batch_size, num_workers, embedding_size, learning_rat
         for i, (target, context) in enumerate(data_loader):
             target = target.to(device)
             context = context.to(device)
+            optimizer.zero_grad()
             prediction = model(context)
             loss = criterion(prediction, target)
 
             # backward
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             losses.append(loss.item())

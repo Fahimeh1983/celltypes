@@ -1,7 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="" />
+    <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/DMGI/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" beforeDir="false" afterPath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DMGI/embedder.py" beforeDir="false" afterPath="$PROJECT_DIR$/DMGI/embedder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DMGI/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/DMGI/evaluate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DMGI/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/DMGI/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DMGI/models/DGI.py" beforeDir="false" afterPath="$PROJECT_DIR$/DMGI/models/DGI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DMGI/models/DMGI.py" beforeDir="false" afterPath="$PROJECT_DIR$/DMGI/models/DMGI.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DMGI/utils/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/DMGI/utils/process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Word2vec/wv.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/wv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/debug.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_wv.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/junk.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/junk.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/word2vec_example_reviews.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/word2vec_example_reviews.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/wv_hyperparam_tunning.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/wv_hyperparam_tunning.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_utils.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -15,9 +34,10 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/DMGI" />
   </component>
   <component name="ProjectId" id="1WoUEVU5Uls1anwP7ajQh99YYq9" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
@@ -29,7 +49,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.debug">
+  <component name="RunManager" selected="Python.main">
     <configuration name="debug" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="cell" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -72,6 +92,27 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="cell" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/DMGI" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DMGI/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="cell" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -95,6 +136,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.debug" />
         <item itemvalue="Python.test" />
         <item itemvalue="Python.graph_utils" />
@@ -127,87 +169,93 @@
       <screen x="1280" y="0" width="1920" height="1200" />
     </state>
     <state x="2023" y="358" width="424" height="484" key="FileChooserDialogImpl/1280.0.1920.1200/0.176.1280.1024@1280.0.1920.1200" timestamp="1582568017633" />
-    <state width="1419" height="414" key="GridCell.Tab.0.bottom" timestamp="1587420831156">
+    <state width="1419" height="254" key="GridCell.Tab.0.bottom" timestamp="1590602816698">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.0.bottom/0.23.1440.797@0.23.1440.797" timestamp="1587420831156" />
+    <state width="1419" height="254" key="GridCell.Tab.0.bottom/0.23.1440.797@0.23.1440.797" timestamp="1590602816698" />
+    <state width="1419" height="176" key="GridCell.Tab.0.bottom/0.23.1440.798@0.23.1440.798" timestamp="1590172035602" />
+    <state width="1716" height="483" key="GridCell.Tab.0.bottom/0.23.1920.977@0.23.1920.977" timestamp="1590534299333" />
     <state width="1801" height="291" key="GridCell.Tab.0.bottom/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352287260" />
     <state width="1801" height="400" key="GridCell.Tab.0.bottom/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.0.center" timestamp="1587420831155">
+    <state width="1419" height="254" key="GridCell.Tab.0.center" timestamp="1590602816698">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.0.center/0.23.1440.797@0.23.1440.797" timestamp="1587420831155" />
+    <state width="1419" height="254" key="GridCell.Tab.0.center/0.23.1440.797@0.23.1440.797" timestamp="1590602816698" />
+    <state width="1419" height="176" key="GridCell.Tab.0.center/0.23.1440.798@0.23.1440.798" timestamp="1590172035601" />
+    <state width="1716" height="483" key="GridCell.Tab.0.center/0.23.1920.977@0.23.1920.977" timestamp="1590534299333" />
     <state width="1801" height="291" key="GridCell.Tab.0.center/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352287259" />
     <state width="1801" height="400" key="GridCell.Tab.0.center/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.0.left" timestamp="1587420831155">
+    <state width="1419" height="254" key="GridCell.Tab.0.left" timestamp="1590602816697">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.0.left/0.23.1440.797@0.23.1440.797" timestamp="1587420831155" />
+    <state width="1419" height="254" key="GridCell.Tab.0.left/0.23.1440.797@0.23.1440.797" timestamp="1590602816697" />
+    <state width="1419" height="176" key="GridCell.Tab.0.left/0.23.1440.798@0.23.1440.798" timestamp="1590172035601" />
+    <state width="1716" height="483" key="GridCell.Tab.0.left/0.23.1920.977@0.23.1920.977" timestamp="1590534299332" />
     <state width="1801" height="291" key="GridCell.Tab.0.left/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352287259" />
     <state width="1801" height="400" key="GridCell.Tab.0.left/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.0.right" timestamp="1587420831156">
+    <state width="1419" height="254" key="GridCell.Tab.0.right" timestamp="1590602816698">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.0.right/0.23.1440.797@0.23.1440.797" timestamp="1587420831156" />
+    <state width="1419" height="254" key="GridCell.Tab.0.right/0.23.1440.797@0.23.1440.797" timestamp="1590602816698" />
+    <state width="1419" height="176" key="GridCell.Tab.0.right/0.23.1440.798@0.23.1440.798" timestamp="1590172035602" />
+    <state width="1716" height="483" key="GridCell.Tab.0.right/0.23.1920.977@0.23.1920.977" timestamp="1590534299333" />
     <state width="1801" height="291" key="GridCell.Tab.0.right/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352287259" />
     <state width="1801" height="400" key="GridCell.Tab.0.right/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.1.bottom" timestamp="1587420821285">
+    <state width="1419" height="254" key="GridCell.Tab.1.bottom" timestamp="1590602816799">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.1.bottom/0.23.1440.797@0.23.1440.797" timestamp="1587420821285" />
+    <state width="1419" height="254" key="GridCell.Tab.1.bottom/0.23.1440.797@0.23.1440.797" timestamp="1590602816799" />
+    <state width="1419" height="176" key="GridCell.Tab.1.bottom/0.23.1440.798@0.23.1440.798" timestamp="1590172037335" />
+    <state width="1716" height="483" key="GridCell.Tab.1.bottom/0.23.1920.977@0.23.1920.977" timestamp="1590534299431" />
     <state width="1801" height="291" key="GridCell.Tab.1.bottom/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352285099" />
     <state width="1801" height="400" key="GridCell.Tab.1.bottom/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.1.center" timestamp="1587420821284">
+    <state width="1419" height="254" key="GridCell.Tab.1.center" timestamp="1590602816797">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.1.center/0.23.1440.797@0.23.1440.797" timestamp="1587420821284" />
+    <state width="1419" height="254" key="GridCell.Tab.1.center/0.23.1440.797@0.23.1440.797" timestamp="1590602816797" />
+    <state width="1419" height="176" key="GridCell.Tab.1.center/0.23.1440.798@0.23.1440.798" timestamp="1590172037334" />
+    <state width="1716" height="483" key="GridCell.Tab.1.center/0.23.1920.977@0.23.1920.977" timestamp="1590534299410" />
     <state width="1801" height="291" key="GridCell.Tab.1.center/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352285099" />
     <state width="1801" height="400" key="GridCell.Tab.1.center/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.1.left" timestamp="1587420821284">
+    <state width="1419" height="254" key="GridCell.Tab.1.left" timestamp="1590602816797">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.1.left/0.23.1440.797@0.23.1440.797" timestamp="1587420821284" />
+    <state width="1419" height="254" key="GridCell.Tab.1.left/0.23.1440.797@0.23.1440.797" timestamp="1590602816797" />
+    <state width="1419" height="176" key="GridCell.Tab.1.left/0.23.1440.798@0.23.1440.798" timestamp="1590172037334" />
+    <state width="1716" height="483" key="GridCell.Tab.1.left/0.23.1920.977@0.23.1920.977" timestamp="1590534299409" />
     <state width="1801" height="291" key="GridCell.Tab.1.left/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352285099" />
     <state width="1801" height="400" key="GridCell.Tab.1.left/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
-    <state width="1419" height="414" key="GridCell.Tab.1.right" timestamp="1587420821285">
+    <state width="1419" height="254" key="GridCell.Tab.1.right" timestamp="1590602816799">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="414" key="GridCell.Tab.1.right/0.23.1440.797@0.23.1440.797" timestamp="1587420821285" />
+    <state width="1419" height="254" key="GridCell.Tab.1.right/0.23.1440.797@0.23.1440.797" timestamp="1590602816799" />
+    <state width="1419" height="176" key="GridCell.Tab.1.right/0.23.1440.798@0.23.1440.798" timestamp="1590172037335" />
+    <state width="1716" height="483" key="GridCell.Tab.1.right/0.23.1920.977@0.23.1920.977" timestamp="1590534299411" />
     <state width="1801" height="291" key="GridCell.Tab.1.right/67.27.1853.1173/1920.0.1920.1200@1920.0.1920.1200" timestamp="1583352285099" />
     <state width="1801" height="400" key="GridCell.Tab.1.right/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583355412211" />
     <state x="351" y="81" key="SettingsEditor" timestamp="1583190995158">
       <screen x="67" y="27" width="1853" height="1173" />
     </state>
-    <state x="221" y="60" key="SettingsEditor/0.23.1440.797@0.23.1440.797" timestamp="1579815508465" />
     <state x="351" y="81" key="SettingsEditor/67.27.1853.1173/1920.0.1920.1200@67.27.1853.1173" timestamp="1583190995158" />
-    <state x="397" y="254" key="com.intellij.ide.util.TipDialog" timestamp="1579815376912">
-      <screen x="0" y="23" width="1440" height="797" />
+    <state x="473" y="223" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1" timestamp="1590007272570">
+      <screen x="0" y="23" width="1920" height="977" />
     </state>
-    <state x="397" y="254" key="com.intellij.ide.util.TipDialog/0.23.1440.797@0.23.1440.797" timestamp="1579815376912" />
-    <state x="385" y="144" width="670" height="676" key="search.everywhere.popup" timestamp="1586989771654">
-      <screen x="0" y="23" width="1440" height="797" />
+    <state x="473" y="223" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.23.1920.977@0.23.1920.977" timestamp="1590007272570" />
+    <state x="513" y="171" width="894" height="829" key="search.everywhere.popup" timestamp="1589932639367">
+      <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state x="385" y="144" width="670" height="676" key="search.everywhere.popup/0.23.1440.797@0.23.1440.797" timestamp="1586989771654" />
+    <state x="513" y="171" width="894" height="829" key="search.everywhere.popup/0.23.1920.977@0.23.1920.977" timestamp="1589932639367" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>387</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>424</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>416</line>
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-      </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

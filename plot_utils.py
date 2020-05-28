@@ -173,7 +173,7 @@ def plot_embedding(data, plot_dim, **kwargs):
 
     Parameters
     ----------
-    model: the word2vec model trained
+    data: a dataframe which containes the Z0, Z1, Z2 ... and colors and annotations
     plot_dim: 2d or 3d plot
     scatter_point_size(optional): size of the scatter points
     annotation: if True, it will use the indexes for annotation
@@ -184,7 +184,10 @@ def plot_embedding(data, plot_dim, **kwargs):
     """
     plot_size = kwargs.get('plot_size', (10, 10))
     annotation = kwargs.get('annotation', False)
+    theta1 = kwargs.get('theta1', None)
+    theta2 = kwargs.get('theta2', None)
     scatter_point_size = kwargs.get('scatter_point_size', 40)
+    data.index = data.index.astype('str')
 
     fig = plt.figure(figsize=plot_size)
 
@@ -200,12 +203,15 @@ def plot_embedding(data, plot_dim, **kwargs):
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
+        if theta1 and theta2 is not None:
+            ax.view_init(theta1, theta2)
 
     for tick in ax.xaxis.get_majorticklabels():  # example for xaxis
         tick.set_fontsize(12)
 
     for tick in ax.yaxis.get_majorticklabels():  # example for xaxis
         tick.set_fontsize(12)
+
 
 
     return fig

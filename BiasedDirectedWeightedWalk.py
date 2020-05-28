@@ -394,10 +394,13 @@ class BiasedDirectedRandomWalk(BeginWalk):
                         weight_cn = 1.0
 
                     if nn == previous_node:  # d_tx = 0
+                        # print(nn, "I am here0")
                         return ip * weight_cn
                     elif nn in previous_node_neighbours:  # d_tx = 1
+                        # print(nn, "I am here1")
                         return 1.0 * weight_cn
                     else:  # d_tx = 2
+                        # print(nn, "I am here2")
                         return iq * weight_cn
 
                 if out_neighbours:
