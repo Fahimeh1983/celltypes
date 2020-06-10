@@ -117,7 +117,6 @@ def build_edge_list(weight_matrix, threshold, directed):
     ----------
     a data frame of edge lists which has the source, target and weight
     '''
-
     symmetric = math_utils.Check_Symmetric(weight_matrix)
     weight_matrix.index = weight_matrix.index.astype(str)
     weight_matrix.columns = weight_matrix.columns.astype(str)

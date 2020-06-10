@@ -108,16 +108,14 @@ def MCBOW_get_word_context_tuples(corpus, window):
     context_tuple_list = []
 
     for text in corpus:
+        text = ['pad', 'pad'] + text + ['pad', 'pad']
         for i, word in enumerate(text):
             first_context_word_index = max(0, i - window)
             last_context_word_index = min(i + window + 1, len(text))
 
             context_list = [text[j] for j in range(first_context_word_index, last_context_word_index) if i != j]
-            if len(context_list) < window * 2:
-                pad_size = window * 2 - len(context_list)
-                for i in range(pad_size):
-                    context_list.append('pad')
-            context_tuple_list.append((word, context_list))
+            if len(context_list) == window * 2:
+                context_tuple_list.append((word, context_list))
 
     print("There are {} pairs of target and context words".format(len(context_tuple_list)))
     return context_tuple_list

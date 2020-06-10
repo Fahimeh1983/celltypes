@@ -30,5 +30,6 @@ class MCBOW_Word2Vec(nn.Module):
         out = torch.mean(self.embeddings(context_words), dim=1)
         out = self.batch_norm(out)
         out = self.linear(out)
+        out = torch.div(out, 0.01)
 
         return out

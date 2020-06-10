@@ -110,6 +110,11 @@ def get_edgelist_dir(roi, project_name, layer):
     path = concat_path(root, project_name, "dat", "edgelists", roi, layer)
     return path
 
+def get_intraction_matrix_filename(roi, project_name, layer):
+    root = get_dir_root()
+    path = concat_path(root, project_name, "dat", "Interaction_mats", roi, layer)
+    return ".".join((path, "csv"))
+
 def get_loss_filename(size, iter, window, lr, batch_size, opt_add=None):
     filename = "_".join(("loss", "size", str(size), "iter", str(iter), "window", str(window), "lr", str(lr),
                          "bs", str(batch_size)))
