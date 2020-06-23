@@ -404,6 +404,7 @@ class BiasedDirectedRandomWalk(BeginWalk):
                         return iq * weight_cn
 
                 if out_neighbours:
+
                     current_node = rs.choice(out_neighbours)
                     for _ in range(length - 1):
                         walk.append(current_node)

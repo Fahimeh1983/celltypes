@@ -120,3 +120,80 @@ def MCBOW_get_word_context_tuples(corpus, window):
     print("There are {} pairs of target and context words".format(len(context_tuple_list)))
     return context_tuple_list
 
+def emitter_get_word_context_tuples(corpus):
+    '''
+
+    Parameters
+    ----------
+    corpus: list of list, which each list is tokenized sentence
+
+    Returns
+    -------
+    emitter_context_tuple_list: a list of tuples which the first member of the tuple is the context word and the second
+    member in the tuple is the target
+    '''
+    emitter_context_tuple_list = []
+
+    for text in corpus:
+        for i, word in enumerate(text):
+            context_word_index = min(i + 1, len(text))
+            if context_word_index < len(text):
+                emitter_context_tuple_list.append((text[context_word_index], word))
+
+    print("There are {} pairs of emitter target and context words".format(len(emitter_context_tuple_list)))
+    return emitter_context_tuple_list
+
+def receiver_get_word_context_tuples(corpus):
+    '''
+
+    Parameters
+    ----------
+    corpus: list of list, which each list is tokenized sentence
+
+    Returns
+    -------
+    receiver_context_tuple_list: a list of tuples which the first member of the tuple is the context word and the second
+    member in the tuple is the target
+    '''
+    receiver_context_tuple_list = []
+
+    for text in corpus:
+        for i, word in enumerate(text):
+            context_word_index = min(i - 1, len(text))
+            if context_word_index > 0:
+                receiver_context_tuple_list.append((text[context_word_index], word))
+
+    print("There are {} pairs of receiver target and context words".format(len(receiver_context_tuple_list)))
+    return receiver_context_tuple_list
+
+def emitter_receiver_get_word_context_tuples(corpus):
+    '''
+
+    Parameters
+    ----------
+    corpus: list of list, which each list is tokenized sentence
+
+    Returns
+    -------
+    receiver_context_tuple_list: a list of tuples which the first member of the tuple is the context word and the second
+    member in the tuple is the target
+    emitter_context_tuple_list: a list of tuples which the first member of the tuple is the context word and the second
+    member in the tuple is the target
+    '''
+    receiver_context_tuple_list = receiver_get_word_context_tuples(corpus)
+    emitter_context_tuple_list = emitter_get_word_context_tuples(corpus)
+
+    return receiver_context_tuple_list, emitter_context_tuple_list
+
+def get_vocab_size_from_list_of_tuples(list_of_tuples):
+    '''
+
+    Parameters
+    ----------
+    list_of_tuples: takes list of tuples
+
+    Returns
+    -------
+    length of the unique vocab size
+    '''
+    return len(set([item for t in list_of_tuples for item in t]))

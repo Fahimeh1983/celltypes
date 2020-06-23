@@ -2,6 +2,21 @@ from torch.utils.data import Dataset
 import torch
 import numpy as np
 
+
+class EmitterReceiverDataset(Dataset):
+    def __init__(self, tuples_list, wd_2_idx):
+        self.target = torch.from_numpy(np.array([wd_2_idx[i[1]] for i in tuples_list]))
+        self.context = torch.from_numpy(np.array([wd_2_idx[i[0]] for i in tuples_list]))
+        self.n_samples = len(tuples_list)
+
+    def __getitem__(self, index):
+        sample = self.context[index], self.target[index]
+        return sample
+
+    def __len__(self):
+        return self.n_samples
+
+
 class WalkDataset(Dataset):
     def __init__(self, word_context_tuples_list, wd_2_idx):
         self.target = torch.from_numpy(np.array([wd_2_idx[i[0]] for i in word_context_tuples_list]))
