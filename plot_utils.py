@@ -186,8 +186,13 @@ def plot_embedding(data, plot_dim, **kwargs):
     annotation = kwargs.get('annotation', False)
     theta1 = kwargs.get('theta1', None)
     theta2 = kwargs.get('theta2', None)
+    xlim = kwargs.get('xlim', None)
+    ylim = kwargs.get('ylim', None)
+    zlim = kwargs.get('zlim', None)
     scatter_point_size = kwargs.get('scatter_point_size', 40)
     data.index = data.index.astype('str')
+
+
 
     fig = plt.figure(figsize=plot_size)
 
@@ -205,6 +210,14 @@ def plot_embedding(data, plot_dim, **kwargs):
                 ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
         if theta1 and theta2 is not None:
             ax.view_init(theta1, theta2)
+
+    if xlim:
+        ax.set_xlim(xlim[0], xlim[1])
+    if ylim:
+        ax.set_ylim(ylim[0], ylim[1])
+    if zlim:
+        ax.set_zlim(zlim[0], zlim[1])
+
 
     for tick in ax.xaxis.get_majorticklabels():  # example for xaxis
         tick.set_fontsize(12)

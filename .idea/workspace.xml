@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/../DMGI/run.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/coupled_wv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/embedder.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/embedder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/main.py" afterDir="false" />
@@ -11,13 +12,10 @@
       <change beforePath="$PROJECT_DIR$/../DMGI/utils/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/utils/process.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" beforeDir="false" afterPath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Word2vec/dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/dataloader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Word2vec/wv.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/wv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/debug.py" beforeDir="false" afterPath="$PROJECT_DIR$/debug.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/DGL_NPP_Linkprediction_tutorial.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/DGL_NPP_Linkprediction_tutorial.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Pytorch_MGL.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Pytorch_MGL.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Word2vec_linkprediction.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Word2vec_linkprediction.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graph_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/graph_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Emittor_Receiver_coupled_W2vec.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Emittor_Receiver_coupled_W2vec.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/JSD_wv_pytorch.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/JSD_wv_pytorch.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/plot_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dgl/examples/pytorch/graphsage/train_sampling_unsupervised.py" beforeDir="false" afterPath="$PROJECT_DIR$/../dgl/examples/pytorch/graphsage/train_sampling_unsupervised.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -182,10 +180,10 @@
       <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state x="592" y="233" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1920.977@0.23.1920.977" timestamp="1586212287776" />
-    <state width="740" height="454" key="DebuggerActiveHint" timestamp="1590711539618">
+    <state width="1281" height="454" key="DebuggerActiveHint" timestamp="1593124035453">
       <screen x="0" y="23" width="1920" height="977" />
     </state>
-    <state width="740" height="454" key="DebuggerActiveHint/0.23.1920.977@0.23.1920.977" timestamp="1590711539618" />
+    <state width="1281" height="454" key="DebuggerActiveHint/0.23.1920.977@0.23.1920.977" timestamp="1593124035453" />
     <state width="1419" height="246" key="GridCell.Tab.0.bottom" timestamp="1591990476011">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
@@ -286,17 +284,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>376</line>
+          <line>375</line>
           <option name="timeStamp" value="15" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>407</line>
+          <line>406</line>
           <option name="timeStamp" value="16" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>432</line>
+          <line>431</line>
           <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>

@@ -283,3 +283,17 @@ def cmdscale(D):
 
     return Y, evals
 
+def return_weight_mat_from_edgelist(edgelist, directed=False):
+    '''
+    Gets the edgelist and return the weight matrix
+    '''
+    elongate_edge_list = []
+    for idx, row in edgelist.iterrows():
+        elongate_edge_list.append([row['source'],row['target'], row['weight']])
+        if not directed:
+            elongate_edge_list.append([row['target'],row['source'], row['weight']])
+    elongate_edge_list = pd.DataFrame(elongate_edge_list, columns=['source', 'target', 'weight'])
+    weight_mat = pd.pivot_table(elongate_edge_list, columns="target", index="source", values="weight")
+    weight_mat[weight_mat.isnull()] = 0
+
+    return weight_mat
