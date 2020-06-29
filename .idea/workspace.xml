@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="0ced09d1-f30b-4c7f-a59a-75e29d7e5611" name="Default Changelist" comment="">
       <change afterPath="$PROJECT_DIR$/../DMGI/run.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coupled_wv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/embedder.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/embedder.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/evaluate.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/evaluate.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/main.py" afterDir="false" />
@@ -11,11 +10,8 @@
       <change beforePath="$PROJECT_DIR$/../DMGI/models/DMGI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/models/DMGI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/utils/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/utils/process.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" beforeDir="false" afterPath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/graph_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Emittor_Receiver_coupled_W2vec.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Emittor_Receiver_coupled_W2vec.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/JSD_wv_pytorch.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/JSD_wv_pytorch.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plot_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/coupled_wv.py" beforeDir="false" afterPath="$PROJECT_DIR$/coupled_wv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Toy_w2vec.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Toy_w2vec.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dgl/examples/pytorch/graphsage/train_sampling_unsupervised.py" beforeDir="false" afterPath="$PROJECT_DIR$/../dgl/examples/pytorch/graphsage/train_sampling_unsupervised.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

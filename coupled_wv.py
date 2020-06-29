@@ -44,6 +44,48 @@ def return_mcbow_dataloader(walks):
                                               num_workers=0)
     return data_loader, index_2_word, word_2_index, vocabulary
 
+def return_basic_wv_dataloader(walks):
+
+    vocabulary = prepare_vocab.get_vocabulary(walks)
+
+    print(f'lenght of vocabulary: {len(vocabulary)}')
+
+    word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=True)
+    index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=True)
+
+    context_tuple_list = prepare_vocab.get_word_context_tuples(walks, window=2)
+
+    dataset = dataloader.WalkDataset(context_tuple_list, word_2_index)
+
+    data_loader = torch.utils.data.DataLoader(dataset=dataset,
+                                              batch_size=2000,
+                                              shuffle=True,
+                                              num_workers=0)
+    return data_loader, index_2_word, word_2_index, vocabulary
+
+
+def return_dataloader_coupled_debug(corpus, vocab_size):
+    vocabulary = prepare_vocab.get_vocabulary(corpus)
+    print(f'lenght of vocabulary: {len(vocabulary)}')
+
+    word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=True)
+    index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=True)
+    context_tuple_list = prepare_vocab.get_word_context_tuples(corpus, window=2)
+
+    emitter_v_size = vocab_size + 1
+    datasets = {}
+
+    datasets['E'] = []
+    dataset = dataloader.WalkDataset(context_tuple_list, word_2_index)
+    datasets['E'].append(dataset)
+    datasets['E'].append(emitter_v_size)
+
+    datasets['R'] = []
+    datasets['R'].append(dataset)
+    datasets['R'].append(emitter_v_size)
+
+    arm_keys, data_loader = build_data_loader(datasets, batch_size=2000, shuffle=False)
+    return arm_keys, data_loader, index_2_word, word_2_index, vocabulary
 
 def return_dataloader_coupled(corpus, vocab_size):
     vocabulary = prepare_vocab.get_vocabulary(corpus)
@@ -64,8 +106,8 @@ def return_dataloader_coupled(corpus, vocab_size):
 
     datasets['R'] = []
     receiver_dataset = dataloader.EmitterReceiverDataset(receiver_tuples, word_2_index)
-    datasets['R'].append(emitter_dataset)
-    datasets['R'].append(emitter_v_size)
+    datasets['R'].append(receiver_dataset)
+    datasets['R'].append(receiver_v_size)
 
     arm_keys, data_loader = build_data_loader(datasets, batch_size=2000, shuffle=False)
     return arm_keys, data_loader, index_2_word, word_2_index, vocabulary
@@ -209,4 +251,46 @@ def run(vocabulary, embedding_size, learning_rate, n_epochs, data_loader, device
 
     return model, training_loss
 
+
+def run_basic_wv(vocabulary, embedding_size, learning_rate, n_epochs, data_loader, device):
+    vocab_size = len(vocabulary) + 1
+    embedding_size = embedding_size
+    learning_rate = learning_rate
+    n_epochs = n_epochs
+
+    criterion = nn.CrossEntropyLoss()
+
+    model = wv.Word2Vec(embedding_size=embedding_size, vocab_size=vocab_size)
+
+    model.to(device)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+    n_total_steps = len(data_loader)
+
+    training_loss = []
+
+    for epoch in range(n_epochs):
+        t0 = time.time()
+        losses = []
+        for i, (target, context) in enumerate(data_loader):
+            target = target.to(device)
+            context = context.to(device)
+            prediction = model(context)
+            loss = criterion(prediction, target)
+
+            # backward
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            losses.append(loss.item())
+
+        t1 = time.time()
+        # print('time is %.2f' % (t1 - t0))
+
+        training_loss.append(np.mean(losses))
+        if epoch % 9 == 0:
+            print(f'epoch: {epoch + 1}/{n_epochs}, loss:{np.mean(losses):.4f}')
+
+    return model, training_loss
 
