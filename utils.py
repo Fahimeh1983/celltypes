@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 
 from enum import Enum
+from IPython.display import Image
+
 
 ################################################
 #
@@ -125,7 +127,7 @@ def get_loss_filename(size, iter, window, lr, batch_size, opt_add=None):
 
 #################################################
 #
-#     Read / writes
+#     Read / writes / show
 #
 #################################################
 
@@ -195,6 +197,8 @@ def read_list_from_csv(path):
         data = list(reader)
     return data[0]
 
+
+
 #################################################
 #
 #     file manipulations
@@ -224,3 +228,19 @@ def reset_rename_index(df, name, index_col_name= None):
         df = df.reset_index().rename(columns={"index": name})
 
     return df
+
+def get_norm(coords):
+    '''
+    get coordiantes in an np.array and compute the L2 norm of each row
+    Parameters
+    ----------
+    coords
+
+    Returns
+    -------
+
+    '''
+    norm = []
+    for coord in coords:
+        norm.append(np.linalg.norm(coord))
+    return np.array(norm)

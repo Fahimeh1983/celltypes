@@ -2,6 +2,7 @@ import matplotlib.pylab as plt
 from mpl_toolkits import mplot3d
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
 def Plot_3D(xyz, **kwargs):
 
@@ -189,6 +190,7 @@ def plot_embedding(data, plot_dim, **kwargs):
     xlim = kwargs.get('xlim', None)
     ylim = kwargs.get('ylim', None)
     zlim = kwargs.get('zlim', None)
+    alpha = kwargs.get('alpha', None)
     scatter_point_size = kwargs.get('scatter_point_size', 40)
     data.index = data.index.astype('str')
 
@@ -198,13 +200,13 @@ def plot_embedding(data, plot_dim, **kwargs):
 
     if plot_dim == 2:
         ax = fig.add_subplot(111)
-        ax.scatter(data['Z0'], data['Z1'], color=data['cluster_color'], s=scatter_point_size)
+        ax.scatter(data['Z0'], data['Z1'], color=data['cluster_color'], s=scatter_point_size, alpha=alpha)
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], txt, size=10)
     if plot_dim == 3:
         ax = fig.add_subplot(111, projection='3d')
-        ax.scatter(data['Z0'], data['Z1'], data["Z2"], color=data['cluster_color'], s=scatter_point_size)
+        ax.scatter(data['Z0'], data['Z1'], data["Z2"], color=data['cluster_color'], s=scatter_point_size, alpha=alpha)
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], data["Z2"][j], txt, size=10)
@@ -226,5 +228,124 @@ def plot_embedding(data, plot_dim, **kwargs):
         tick.set_fontsize(12)
 
 
+
+    return fig
+
+
+def plot_polar_source_target_relation(theta, r1, r2=None, **kwargs):
+    """
+
+    parameters
+    ----------
+    title: string
+    title_position: list of two numbers for x and y position of title
+    theta: the x values
+    r1: np.array y1 valus
+    r2: np.array y2 valus
+    r1_line_color: color of the r1 plot lines
+    r1_scatter_colors: colors of the r1 plot scatter points
+    r2_line_color: color of the r2 plot lines
+    r2_scatter_colors: colors of the r2 plot scatter points
+    xtick_labels: labels of the xticks
+    xtick_labels_font: fonts of of the xticks labels
+    right_labels: list of index of all right labels
+    left_labels: list of index of all left labels
+    """
+
+    n_nodes = len(theta)
+
+    plot_size = kwargs.get('plot_size', (10, 10))
+    title = kwargs.get('title', None)
+    title_position = kwargs.get('title_position', [.5, 1.25])
+    r1_line_color = kwargs.get('r1_line_color', 'cornflowerblue')
+    r1_scatter_colors = kwargs.get('r1_scatter_colors', ['cornflowerblue'])
+    r2_line_color = kwargs.get('r2_line_color', 'red')
+    r2_scatter_colors = kwargs.get('r2_scatter_colors', ['red'])
+    xtick_labels = kwargs.get('xtick_labels', [str(i) for i in range(0, n_nodes)])
+    xtick_labels_font = kwargs.get('xtick_labels_font', 10)
+    xtick_label_colors = kwargs.get('xtick_label_colors', ['black'])
+    right_labels = kwargs.get('right_labels', [i for i in range(24, 70)])
+    left_labels = kwargs.get('left_labels', [i for i in range(0, 24)] + [i for i in range(70, n_nodes)])
+    print_yticklabels = kwargs.get('print_yticklabels', False)
+    rmax = kwargs.get('rmax', 0.0006)
+
+
+    fig = plt.figure(figsize=plot_size)
+    ax1 = fig.add_subplot(121, projection='polar')
+
+    if title:
+        ax1.title.set_text("Emitter_" + title)
+    if title_position:
+        ax1.title.set_position(title_position)
+
+    ax1.plot(theta, r1, c=r1_line_color, label="Emit")
+    ax1.scatter(theta, r1, c=r1_scatter_colors)
+
+    if r2.tolist():
+        ax2 = fig.add_subplot(122, projection='polar')
+        ax2.plot(theta, r2, c=r2_line_color, alpha=0.5, label="Receive")
+        ax2.scatter(theta, r2, c=r2_scatter_colors, alpha=0.5)
+
+    if title:
+        ax2.title.set_text("Receiver_" + title)
+    if title_position:
+        ax2.title.set_position(title_position)
+
+
+    for ax in [ax1, ax2]:
+        ax.set_xticks(theta)
+        ax.set_xticklabels(xtick_labels, fontsize=xtick_labels_font, rotation=[t * 180 / np.pi for t in theta])
+
+        plt.gcf().canvas.draw()
+        angles = np.linspace(0, 2 * np.pi, len(ax.get_xticklabels()) + 1)
+        angles[np.cos(angles) < 0] = angles[np.cos(angles) < 0] + np.pi
+        angles = np.rad2deg(angles)
+        labels = []
+
+        jj = 0
+        for label, angle in zip([ax.get_xticklabels()[i] for i in right_labels],
+                            [angles[i] for i in right_labels]):
+            x, y = label.get_position()
+
+            select_color = right_labels[jj]
+
+            if len(xtick_label_colors) > 1:
+                selected_color = xtick_label_colors[select_color]
+            else:
+               selected_color = xtick_label_colors[0]
+
+            lab = ax.text(x, y, label.get_text(), transform=label.get_transform(), ha=label.get_ha(),
+                      va=label.get_va(), fontsize=xtick_labels_font, c=selected_color)
+            lab.set_rotation(angle)
+            lab.set_horizontalalignment("right")
+            lab.set_rotation_mode("anchor")
+            labels.append(lab)
+            jj += 1
+
+        jj = 0
+        for label, angle in zip([ax.get_xticklabels()[i] for i in left_labels],
+                            [angles[i] for i in left_labels]):
+            x, y = label.get_position()
+
+            select_color = left_labels[jj]
+            if len(xtick_label_colors) > 1:
+               selected_color = xtick_label_colors[select_color]
+            else:
+                selected_color = xtick_label_colors[0]
+
+            lab = ax.text(x, y, label.get_text(), transform=label.get_transform(), ha=label.get_ha(),
+                      va=label.get_va(), fontsize=xtick_labels_font, c=selected_color)
+            lab.set_rotation(angle)
+            lab.set_horizontalalignment("left")
+            lab.set_rotation_mode("anchor")
+            labels.append(lab)
+            jj += 1
+
+        ax.set_xticklabels([])
+        if not print_yticklabels:
+            ax.set_yticklabels([])
+
+        if rmax:
+            ax.set_rmax(rmax)
 
     return fig

@@ -35,7 +35,7 @@ class BeginWalk(object):
         end_nodes = self.get_end_nodes(directed=directed, weighted=weighted)
 
         if end_nodes is not None:
-            raise TypeError("Each node must have at least one connection (we had"
+            raise TypeError(end_nodes, "Each node must have at least one connection (we had"
                             "to add a self connection to it if there is not any out "
                             "going connection).")
 

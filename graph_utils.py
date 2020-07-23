@@ -9,6 +9,8 @@ from cell import utils, math_utils
 import numpy as np
 import pandas as pd
 import networkx as nx
+import scipy as sp
+
 
 from stellargraph import StellarDiGraph, StellarGraph
 
@@ -297,3 +299,43 @@ def return_weight_mat_from_edgelist(edgelist, directed=False):
     weight_mat[weight_mat.isnull()] = 0
 
     return weight_mat
+
+
+
+def return_theta(n_nodes):
+    '''
+    Take number of nodes and create polar angles for plotting purposes
+    Args:
+        n_nodes: number of nodes in the graph
+
+    Returns:
+
+    '''
+    return [ i * 2 * np.pi / n_nodes for i in range(n_nodes)]
+
+
+def split_train_test_graph(adj, test_percent):
+    '''
+     parameters
+    ----------
+    adj: adjacency or the weight matrix as an np.array
+    test_percent: total amount of edges to be saved for test
+
+     return
+    ----------
+    train_adj: np.array
+    test_adj: np.arary
+    test_nodes: np.array
+    '''
+    train_adj = []
+    test_adj = []
+    test_nodes = []
+
+    n_nodes = adj.shape[0]
+    for i, row in enumerate(adj):
+        select_random_index = np.random.choice(range(n_nodes), int(test_percent * 100))
+        test_adj.append([row[j] for j in select_random_index])
+        test_nodes.append(select_random_index)
+        train_adj.append([0. if i in select_random_index else r for i, r in enumerate(row)])
+
+    return np.array(train_adj), np.array(test_adj), np.array(test_nodes)

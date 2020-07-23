@@ -87,29 +87,31 @@ def return_dataloader_coupled_debug(corpus, vocab_size):
     arm_keys, data_loader = build_data_loader(datasets, batch_size=2000, shuffle=False)
     return arm_keys, data_loader, index_2_word, word_2_index, vocabulary
 
-def return_dataloader_coupled(corpus, vocab_size):
+def return_dataloader_coupled(corpus, padding=True, window=2, shuffle=True, batch_size=2000):
+
     vocabulary = prepare_vocab.get_vocabulary(corpus)
-    print(f'lenght of vocabulary: {len(vocabulary)}')
+    word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=padding)
+    index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=padding)
+    receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
 
-    word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=False)
-    index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
-    receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_get_word_context_tuples(corpus)
+    if padding:
+        vocab_size = len(vocabulary) + 1
+    else:
+        vocab_size = len(vocabulary)
 
-    emitter_v_size = vocab_size
-    receiver_v_size = vocab_size
     datasets = {}
 
     datasets['E'] = []
     emitter_dataset = dataloader.EmitterReceiverDataset(emitter_tuples, word_2_index)
     datasets['E'].append(emitter_dataset)
-    datasets['E'].append(emitter_v_size)
+    datasets['E'].append(vocab_size)
 
     datasets['R'] = []
     receiver_dataset = dataloader.EmitterReceiverDataset(receiver_tuples, word_2_index)
     datasets['R'].append(receiver_dataset)
-    datasets['R'].append(receiver_v_size)
+    datasets['R'].append(vocab_size)
 
-    arm_keys, data_loader = build_data_loader(datasets, batch_size=2000, shuffle=False)
+    arm_keys, data_loader = build_data_loader(datasets, batch_size=batch_size, shuffle=shuffle)
     return arm_keys, data_loader, index_2_word, word_2_index, vocabulary
 
 
@@ -154,8 +156,8 @@ class EmitterReceiver_Word2Vec(nn.Module):
             context_word_embedding[arm] = word_embedding
 
         for arm in range(self.n_arm):
-            #which_arm = -1 * arm + 1
-            which_arm = arm
+            which_arm = -1 * arm + 1
+            # which_arm = arm
             predictions[arm] = self.decoder(context_word_embedding[which_arm], arm)
 
         return predictions
