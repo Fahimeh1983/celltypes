@@ -156,8 +156,8 @@ class EmitterReceiver_Word2Vec(nn.Module):
             context_word_embedding[arm] = word_embedding
 
         for arm in range(self.n_arm):
-            which_arm = -1 * arm + 1
-            # which_arm = arm
+            # which_arm = -1 * arm + 1
+            which_arm = arm
             predictions[arm] = self.decoder(context_word_embedding[which_arm], arm)
 
         return predictions
@@ -296,3 +296,59 @@ def run_basic_wv(vocabulary, embedding_size, learning_rate, n_epochs, data_loade
 
     return model, training_loss
 
+
+class EmitterReceiver_Word2Vec_2arms(nn.Module):
+    """
+    """
+
+    def __init__(self, vocab_size=[93], embedding_size=2, n_arm=1):
+        """
+        """
+        super(EmitterReceiver_Word2Vec, self).__init__()
+        self.vocab_size = vocab_size
+        self.embedding_size = embedding_size
+        self.n_arm = n_arm
+
+        self.embeddings = nn.ModuleList([nn.Embedding(vocab_size[i],
+                                                      embedding_size)
+                                         for i in range(n_arm)])
+
+        self.linear = nn.ModuleList([nn.Linear(embedding_size,
+                                               vocab_size[i])
+                                     for i in range(n_arm)])
+
+    def encoder(self, context_word, arm):
+        h1 = self.embeddings[arm](context_word)
+        return h1
+
+    def decoder(self, context_word_embedding_of_the_other_arm, arm):
+        h2 = self.linear[arm](context_word_embedding_of_the_other_arm)
+        return h2
+
+    def forward(self, context_word):
+        emb = [None] * self.n_arm
+        predictions = [None] * self.n_arm
+        context_word_embedding = [None] * self.n_arm
+
+        for arm in range(self.n_arm):
+            word_embedding = self.encoder(context_word[arm], arm)
+            context_word_embedding[arm] = word_embedding
+
+        for arm in range(self.n_arm):
+            which_arm = arm * -1 + 1
+            predictions[arm] = self.decoder(context_word_embedding[which_arm], arm)
+
+        return predictions
+
+
+def loss_emitter_receiver_2arms(predictions, target,
+                                n_arm, vocab_size, batch_size):
+    loss_indep = [None] * n_arm
+
+    for arm, (k, v) in enumerate(arm_keys.items()):
+        predictions[arm] = torch.reshape(predictions[arm], (batch_size, vocab_size))
+        loss_indep[arm] = F.cross_entropy(predictions[arm], target[arm])
+
+    loss = sum(loss_indep)
+
+    return loss

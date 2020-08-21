@@ -120,20 +120,6 @@ def MCBOW_get_word_context_tuples(corpus, window):
     print("There are {} pairs of target and context words".format(len(context_tuple_list)))
     return context_tuple_list
 
-def emitter_receiver_tuples(corpus, window):
-    emitter_tuple_list = []
-    receiver_tuple_list = []
-    for text in corpus:
-        for i, word in enumerate(text):
-            first_context_word_index = max(0, i - window)
-            last_context_word_index = min(i + window + 1 , len(text))
-            if (i >= window) & (i<len(text)- window):
-                for j in range(first_context_word_index, i):
-                    emitter_tuple_list.append((word, text[j]))
-                for j in range(last_context_word_index-1, i, -1):
-                    receiver_tuple_list.append((word, text[j]))
-    return emitter_tuple_list, receiver_tuple_list
-
 
 def get_vocab_size_from_list_of_tuples(list_of_tuples):
     '''
@@ -147,3 +133,18 @@ def get_vocab_size_from_list_of_tuples(list_of_tuples):
     length of the unique vocab size
     '''
     return len(set([item for t in list_of_tuples for item in t]))
+
+
+def emitter_receiver_tuples(corpus, window):
+    emitter_tuple_list = []
+    receiver_tuple_list = []
+    for text in corpus:
+        for i, word in enumerate(text):
+            first_context_word_index = max(0, i - window)
+            last_context_word_index = min(i + window + 1 , len(text))
+            if (i >= window) & (i<len(text)- window):
+                for j in range(first_context_word_index, i):
+                    emitter_tuple_list.append((word, text[j]))
+                for j in range(last_context_word_index-1, i, -1):
+                    receiver_tuple_list.append((word, text[j]))
+    return emitter_tuple_list, receiver_tuple_list

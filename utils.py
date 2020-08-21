@@ -125,6 +125,34 @@ def get_loss_filename(size, iter, window, lr, batch_size, opt_add=None):
     filename = ".".join((filename, "csv"))
     return filename
 
+
+def get_E_R_embedding_filepath(filepath, prefix_filename, embedding_size, window, lamda):
+    '''
+    returns 2 filepaths for right and left embeddings
+
+    Parameters
+    ----------
+    filepath: path
+    prefix_filename: prefix
+    embedding size
+    window
+    lamda
+
+    Returns
+    -------
+    filepath for E and R embeddings
+    '''
+
+    filename =  "w" + str(window) + "_" + str(embedding_size) + "d.csv"
+    E_path = filepath + prefix_filename + "lambda" + str(lamda) + "_E_" + filename
+    R_path = filepath + prefix_filename + "lambda" + str(lamda) + "_R_" + filename
+    print(E_path)
+    print(R_path)
+    return E_path, R_path
+
+
+
+
 #################################################
 #
 #     Read / writes / show
@@ -244,3 +272,45 @@ def get_norm(coords):
     for coord in coords:
         norm.append(np.linalg.norm(coord))
     return np.array(norm)
+
+
+def normalized_each_row_by_rowsum(df):
+    '''
+    get a df and divide each row by the rowsum
+
+    Parameters
+    ----------
+    df
+
+    Returns
+    -------
+    '''
+    row_sums = df.sum(axis=1)
+    new_matrix = df / row_sums[:, np.newaxis]
+    return new_matrix
+
+def shift_E_R_to_positive(paths):
+    '''
+    move E and R embeddings to positive values
+
+    Parameters
+    ----------
+    filepath: list of E and R paths
+
+    Returns
+    -------
+    shifted coordinates
+    '''
+    mins = []
+    for path in paths:
+        file = pd.read_csv(path, index_col="Unnamed: 0")
+        # get the min values for all columns
+        mins.append(np.array(np.min(file, axis=0)))
+
+    min_mins = np.min(np.array(mins), axis=0)
+
+    shifted_files = []
+    for path in paths:
+        file = pd.read_csv(path, index_col="Unnamed: 0")
+        shifted_files.append(file - min_mins)
+    return shifted_files

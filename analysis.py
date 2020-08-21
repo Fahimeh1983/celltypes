@@ -11,7 +11,7 @@ from scipy import linalg
 import scipy as sp
 from statistics import mean
 
-def summarize_walk_embedding_results(gensim_dict, index, ndim, cl_df=None, padding_label=None):
+def summarize_walk_embedding_results(gensim_dict, index, embedding_size, cl_df=None, padding_label=None, desired_cols=None):
     """
     Takes a dictionary of gensim word2vec output and make a data frame for more analysis. This can be used
     for only one or for multiple graphs. so if it is only one graph then the dict has only one key
@@ -19,7 +19,8 @@ def summarize_walk_embedding_results(gensim_dict, index, ndim, cl_df=None, paddi
     Parameters
     ----------
     gensim_dict: keys are the name or the label of the graph and the values are the word2vec output
-    ndim: embedding size
+    index: index of each row
+    embedding_size: embedding size
     cl_df: it is a reference df which has the cluster_id and cluster_color, if provided, then those data
     will be added to the output data frame
 
@@ -28,25 +29,28 @@ def summarize_walk_embedding_results(gensim_dict, index, ndim, cl_df=None, paddi
     a data frame which has the embedding and some more info if cl_df is provided
     """
 
-    data = pd.DataFrame()
+    data = []
 
     for k, v in gensim_dict.items():
 
         emb = pd.DataFrame(v, index=index)
-        emb.columns = ["Z" + str(i) for i in range(ndim)]
+        emb.columns = ["Z" + str(i) for i in range(embedding_size)]
         emb.index.name = "cluster_id"
 
         if cl_df is not None:
-            if padding_label is None:
-                raise ValueError("When cl_df is given, padding_idx must be provided")
-            else:
+            if padding_label:
                 emb = emb.drop(padding_label)
 
             cl_df.index = cl_df.index.astype(str)
+            emb.index = emb.index.astype(str)
             emb = emb.merge(cl_df, on="cluster_id")
 
-        emb['channel_id'] = k
-        data = data.append(emb)
+        if desired_cols is None:
+            print_cols = ["Z" + str(i) for i in range(embedding_size)]
+        else:
+            print_cols = ["Z" + str(i) for i in range(embedding_size)] + desired_cols
+
+        data.append(emb[print_cols])
 
     return data
 
@@ -68,32 +72,30 @@ def get_closest_nodes(emb, index, node, topn):
 
     dist = squareform(pdist(emb))
     dist = pd.DataFrame(dist, index=index, columns=index)
-    dist.values[np.arange(dist.shape[0]),np.arange(dist.shape[0])] = dist.max(axis=1)
-    idx = np.argsort(dist.loc[node].tolist())
-    sorted_indices = [index[i] for i in idx]
-    return sorted_indices[0:topn]
 
-def get_closest_node_label(emb, index, node, topn, cl_df):
-    '''
+    return dist.loc[node][np.argsort(dist.loc[node])][0:topn]
 
-    Parameters
-    ----------
-    emb
-    index
-    node
-    cl_df
-    topn
-
-    Returns
-    -------
-
-    '''
-    nn = get_closest_nodes(emb, index, node, topn)
-    print("closest nodes to :", cl_df.loc[[node]]['cluster_label'][0])
-    print("------------------------------------------")
-    print("")
-    print(cl_df.loc[[i for i in nn]][['cluster_label']])
-    return cl_df.loc[[i for i in nn]]['cluster_label'].tolist()
+# def get_closest_node_label(emb, index, node, topn, cl_df):
+#     '''
+#
+#     Parameters
+#     ----------
+#     emb
+#     index
+#     node
+#     cl_df
+#     topn
+#
+#     Returns
+#     -------
+#
+#     '''
+#     nn = get_closest_nodes(emb, index, node, topn)
+#     print("closest nodes to :", cl_df.loc[[node]]['cluster_label'][0])
+#     print("------------------------------------------")
+#     print("")
+#     print(cl_df.loc[[i for i in nn]][['cluster_label']])
+#     return cl_df.loc[[i for i in nn]]['cluster_label'].tolist()
 
 
 def run_procrustes_analysis(df1, df2, cl_df=None):
@@ -212,7 +214,8 @@ def nandcg_score_at_k(similarity, adj, k=None):
 
     Parameters
     ----------
-    similarity: np.array of similarity scores, each row is the similarity of that node with respect to all other nodes
+    similarity: np.array of similarity scores, each row is the similarity of that node with respect to all other nodes.
+    The index and column must be the same as adj index and column
     adj: adjacency np.array, the weights will be used as the relevance for each edge
     k: int, if provided, the ndcg at rank k will be used. If none all the ranks will be used
 
@@ -220,7 +223,6 @@ def nandcg_score_at_k(similarity, adj, k=None):
     -------
     nandcg_score_at_k: np.array, averaged ndcg over all nodes of the graph
     '''
-
     if adj.shape[0] != adj.shape[1]:
         utils.raise_error(
             "adj should be an square np.array, instead is ({}) by ({})".format(adj.shape[0], adj.shape[1])
@@ -229,9 +231,8 @@ def nandcg_score_at_k(similarity, adj, k=None):
     ndcg = []
     n_nodes = adj.shape[0]
     for n in range(n_nodes):
-        sorted_similarity_index_of_n = np.argsort(-similarity[n])
-        predicted_scores = np.array([similarity[n][sorted_similarity_index_of_n]])
-        true_relevance = np.array([adj[n][sorted_similarity_index_of_n]])
+        predicted_scores = np.array([similarity[n]])
+        true_relevance = np.array([adj[n]])
         ndcg.append(ndcg_score(true_relevance, predicted_scores, k=k))
 
     return sum(ndcg) / n_nodes
@@ -266,4 +267,7 @@ def coefficient_of_determination(ys_orig,ys_line):
     squared_error_regr = squared_error(ys_orig, ys_line)
     squared_error_y_mean = squared_error(ys_orig, y_mean_line)
     return 1 - (squared_error_regr/squared_error_y_mean)
+
+
+
 

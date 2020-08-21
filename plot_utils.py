@@ -196,6 +196,7 @@ def plot_embedding(data, plot_dim, **kwargs):
 
 
 
+
     fig = plt.figure(figsize=plot_size)
 
     if plot_dim == 2:
@@ -349,3 +350,52 @@ def plot_polar_source_target_relation(theta, r1, r2=None, **kwargs):
             ax.set_rmax(rmax)
 
     return fig
+
+
+def plot_ER(E, R, figsize, plot_dim, annotation, E_color=None, R_color=None, E_marker='o', R_marker='x', use_type_colors=False):
+    """
+    plot right and left embeddings on one plot
+    parameters
+    ----------
+    E: df of emitter embeddings
+    R: df of receiver embeddings
+    figsize: figsize
+    plot_dim: 2d or 3d plot
+    annotation: if True, it will use the index of E and R for embedding
+    E_color: color of emitter points
+    R_color: color of receiver points
+    E_marker: E_marker
+    R_marker: R_marker
+    use_type_colors: if True, it will use "cluster_color" of each df for colors
+    """
+    fig = plt.figure(figsize=figsize)
+    data = pd.concat((E, R))
+    lim1 = np.floor(np.min(pd.concat((data['Z0'], data['Z1']))))
+    lim2 = np.ceil(np.max(pd.concat((data['Z0'], data['Z1']))))
+    if use_type_colors:
+        E_color = E['cluster_color']
+        R_color = R['cluster_color']
+
+    if plot_dim == 3:
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(E['Z0'], E['Z1'], E['Z2'], c=E_color, s=30, marker=E_marker, label='E')
+        ax.scatter(R['Z0'], R['Z1'], R['Z2'], c=R_color, s=30, marker=R_marker, label='R')
+        if annotation:
+            for j, txt in enumerate(data.index.tolist()):
+                ax.text(data['Z0'][j], data["Z1"][j], data['Z2'][j], txt, size=10)
+        ax.set_zlim(lim1, lim2)
+
+    else:
+        ax = fig.add_subplot(111)
+        ax.scatter(E['Z0'], E['Z1'], c=E_color, s=30, marker=E_marker, label="E")
+        ax.scatter(R['Z0'], R['Z1'], c=R_color, s=30, marker=R_marker, label="R")
+        if annotation:
+            for j, txt in enumerate(data.index.tolist()):
+                ax.text(data['Z0'][j], data["Z1"][j], txt, size=10)
+
+    ax.set_xlim(lim1, lim2)
+    ax.set_ylim(lim1, lim2)
+
+    plt.legend()
+    plt.show()
+
