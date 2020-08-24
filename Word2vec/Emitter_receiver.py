@@ -209,44 +209,54 @@ def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, 
 
     '''
     AE_loss = loss_AE_independent(output, n_arms, n_nodes, first_node)
-    distance_loss = loss_emitter_receiver_independent(
-        first_second_node_embeddings, batch_size) / min_var_loss(model, n_arms)
+    mvl = min_var_loss(model, n_arms)
+    if torch.isnan(mvl):
+        epsilon = 0.1
+    else:
+        epsilon = 0.
+    distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings, batch_size) / (mvl + epsilon)
     return distance_loss + lamda * AE_loss
 
 
 
 # Reading the walks for the graph
 
-p = 1
-q = 1
-N = 1
+# p = 1
+# q = 1
+# N = 1
 padding = False
-length = 10000
-roi = "VISp"
-walk_filename = "walk_node21_32_removed.csv"
-project_name = "NPP_GNN_project"
-layer_class = "single_layer"
-layer = "base_unnormalized_allcombined"
-walk_type= "Directed_Weighted_node2vec"
+# length = 10000
+# roi = "VISp"
+# walk_filename = "walk_node21_32_removed.csv"
+# project_name = "NPP_GNN_project"
+# layer_class = "single_layer"
+# layer = "base_unnormalized_allcombined"
+# walk_type= "Directed_Weighted_node2vec"
+#
+# walk_dir = utils.get_walk_dir(roi,
+#                               project_name,
+#                               N,
+#                               length,
+#                               p,
+#                               q,
+#                               layer_class,
+#                               layer,
+#                               walk_type)
+#
+# corpus = utils.read_list_of_lists_from_csv(os.path.join(walk_dir, walk_filename))
+# vocabulary = prepare_vocab.get_vocabulary(corpus)
+#
+# print(f'lenght of vocabulary: {len(vocabulary)}')
 
-walk_dir = utils.get_walk_dir(roi,
-                              project_name,
-                              N,
-                              length,
-                              p,
-                              q,
-                              layer_class,
-                              layer,
-                              walk_type)
+# word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=False)
+# index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
 
-corpus = utils.read_list_of_lists_from_csv(os.path.join(walk_dir, walk_filename))
-vocabulary = prepare_vocab.get_vocabulary(corpus)
+walks = utils.read_list_of_lists_from_csv("./walk_weighted_directed_footbal_v2.csv")
+vocabulary = prepare_vocab.get_vocabulary(walks)
+word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=padding)
+index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=padding)
 
-print(f'lenght of vocabulary: {len(vocabulary)}')
-
-word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=False)
-index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
-
+            #
 
 # Run the code with different values for the window, lambda and embedding size
 for w in [1]:
@@ -256,12 +266,12 @@ for w in [1]:
             batch_size = 2000
             embedding_size = e
             learning_rate = 0.001
-            n_epochs = 200
+            n_epochs = 100
             n_arms = 2
             lamda = l
 
-            receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
-
+            # receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
+            receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(walks, window=window)
             if padding:
                 n_nodes = len(vocabulary) + 1
             else:
@@ -303,7 +313,7 @@ for w in [1]:
                     optimizer.zero_grad()
                     first_second_node_embeddings, output = model(first_node, second_node)
                     loss = total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda)
-                    loss.backward(retain_graph=True)
+                    loss.backward()
                     optimizer.step()
                     losses.append(loss.item())
 
@@ -319,10 +329,10 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "AE_NPP_BCE_lambda"+ str(l) + "_R_w" + str(window) + "_" + str(embedding_size) + "d.csv"
+            output_filename = "AE_BCE_lambda"+ str(l) + "_R_w" + str(window) + "_" + str(embedding_size) + "d.csv"
             R.to_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/" + output_filename)
 
-            output_filename = "AE_NPP_BCE_lambda"+ str(l) + "_E_w" + str(window) + "_" + str(embedding_size) + "d.csv"
+            output_filename = "AE_BCE_lambda"+ str(l) + "_E_w" + str(window) + "_" + str(embedding_size) + "d.csv"
             E.to_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/" + output_filename)
 
             print("finished w:" , w, "embedding size:", e)
