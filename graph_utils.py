@@ -5,14 +5,15 @@ __email__ = 'fahimeh.baftizadeh@gmail.com'
 
 import os
 
-from cell import utils, math_utils
+from utils import *
+from math_utils import *
 import numpy as np
 import pandas as pd
 import networkx as nx
 import scipy as sp
 
 
-from stellargraph import StellarDiGraph, StellarGraph
+#from stellargraph import StellarDiGraph, StellarGraph
 
 
 def check_wts(graph, weighted):
@@ -40,19 +41,19 @@ def check_wts(graph, weighted):
                 wts = set()
                 for weight in graph._edge_weights(node, out_neighbor):
                     if weight is None or np.isnan(weight) or weight == np.inf:
-                        utils.raise_error(
+                        raise_error(
                             "Missing or invalid edge weight ({}) between ({}) and ({}).".format(
                                 weight, node, out_neighbor
                             )
                         )
                     if not isinstance(weight, (int, float)):
-                        utils.raise_error(
+                        raise_error(
                             "Edge weight between nodes ({}) and ({}) is not numeric ({}).".format(
                                 node, out_neighbor, weight
                             )
                         )
                     if weight < 0:  # check if edge has a negative weight
-                        utils.raise_error(
+                        raise_error(
                             "An edge weight between nodes ({}) and ({}) is negative ({}).".format(
                                 node, out_neighbor, weight
                             )
@@ -61,47 +62,47 @@ def check_wts(graph, weighted):
                     wts.add(weight)
                 if len(wts) > 1:
                     # multigraph with different weights on edges between same pair of nodes
-                    utils.raise_error(
+                    raise_error(
                         "({}) and ({}) have multiple edges with weights ({}). Ambiguous to choose an edge for the random walk.".format(
                             node, out_neighbor, list(wts)
                         )
                     )
     else:
-        utils.raise_error("This check is done only for weighted graphs")
+        raise_error("This check is done only for weighted graphs")
 
 
 
-def Make_stellar_graph(path_to_nodes, path_to_edges, directed):
-    '''
-    Create a Stellar graph object from nodes and edges
-
-    parameters
-    ----------
-    path_to_nodes: is the path to nodes dir. There should be a file names nodes.csv in that dir.
-                    Which has a list of nodes, I think they must be strings
-    path_to_edges : is the path to edges dir. There should be a file named edges.csv in that dir.
-                    The edge file will have 3 columns with the names of "source", "target" and "weight"
-    directed: True or False, if yes then it means that the edges are made from
-              "source" to "target" and not the other way around
-
-    returns
-    ----------
-    Graph object
-    '''
-    nodes_file = os.path.join(path_to_nodes, "nodes.csv")
-    nodes = pd.read_csv(nodes_file, index_col="Unnamed: 0")
-
-    edges_file = os.path.join(path_to_edges, "edges.csv")
-    edges = pd.read_csv(edges_file, index_col="Unnamed: 0")
-
-    if directed:
-        print("Directed graph is made")
-        Gs = StellarDiGraph(nodes, edges)
-    else:
-        print("UN-Directed graph is made")
-        Gs = StellarGraph(nodes, edges)
-
-    return edges
+# def Make_stellar_graph(path_to_nodes, path_to_edges, directed):
+#     '''
+#     Create a Stellar graph object from nodes and edges
+#
+#     parameters
+#     ----------
+#     path_to_nodes: is the path to nodes dir. There should be a file names nodes.csv in that dir.
+#                     Which has a list of nodes, I think they must be strings
+#     path_to_edges : is the path to edges dir. There should be a file named edges.csv in that dir.
+#                     The edge file will have 3 columns with the names of "source", "target" and "weight"
+#     directed: True or False, if yes then it means that the edges are made from
+#               "source" to "target" and not the other way around
+#
+#     returns
+#     ----------
+#     Graph object
+#     '''
+#     nodes_file = os.path.join(path_to_nodes, "nodes.csv")
+#     nodes = pd.read_csv(nodes_file, index_col="Unnamed: 0")
+#
+#     edges_file = os.path.join(path_to_edges, "edges.csv")
+#     edges = pd.read_csv(edges_file, index_col="Unnamed: 0")
+#
+#     if directed:
+#         print("Directed graph is made")
+#         Gs = StellarDiGraph(nodes, edges)
+#     else:
+#         print("UN-Directed graph is made")
+#         Gs = StellarGraph(nodes, edges)
+#
+#     return edges
 
 
 def build_edge_list(weight_matrix, threshold, directed):
@@ -119,7 +120,7 @@ def build_edge_list(weight_matrix, threshold, directed):
     ----------
     a data frame of edge lists which has the source, target and weight
     '''
-    symmetric = math_utils.Check_Symmetric(weight_matrix)
+    symmetric = Check_Symmetric(weight_matrix)
     weight_matrix.index = weight_matrix.index.astype(str)
     weight_matrix.columns = weight_matrix.columns.astype(str)
 
