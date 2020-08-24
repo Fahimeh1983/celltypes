@@ -9,12 +9,12 @@ import pandas as pd
 import numpy as np
 from cell import graph_utils, utils
 from cell.Word2vec import prepare_vocab, dataloader, wv
-from stellargraph import StellarGraph
+# from stellargraph import StellarGraph
 from torch.nn import functional as F
-from stellargraph.data import BiasedRandomWalk
-import cell.BiasedDirectedWeightedWalk as BDWW
-from stellargraph import StellarDiGraph
-from IPython.display import Image
+# from stellargraph.data import BiasedRandomWalk
+# import cell.BiasedDirectedWeightedWalk as BDWW
+# from stellargraph import StellarDiGraph
+# from IPython.display import Image
 from cell import  utils, analysis, plot_utils
 from cell.Word2vec import prepare_vocab, dataloader, wv
 import matplotlib.pylab as plt
