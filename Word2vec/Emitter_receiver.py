@@ -7,19 +7,20 @@ import itertools
 import torch.nn as nn
 import pandas as pd
 import numpy as np
-from cell import graph_utils, utils
-from cell.Word2vec import prepare_vocab, dataloader, wv
+from graph_utils import *
+from utils import *
+from analysis import *
+from plot_utils import *
+from Word2vec.dataloader import *
+from Word2vec.prepare_vocab import *
+from Word2vec.wv import *
 # from stellargraph import StellarGraph
 from torch.nn import functional as F
 # from stellargraph.data import BiasedRandomWalk
 # import cell.BiasedDirectedWeightedWalk as BDWW
 # from stellargraph import StellarDiGraph
 # from IPython.display import Image
-from cell import  utils, analysis, plot_utils
-from cell.Word2vec import prepare_vocab, dataloader, wv
 import matplotlib.pylab as plt
-
-
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -165,7 +166,7 @@ def loss_AE_independent(output, n_arms, n_nodes, first_node):
 
     bce_loss = [None] * n_arms
     for arm in range(n_arms):
-        target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes)).float()
+        target = (first_node[arm] == torch.arange(n_nodes).reshape(1,n_nodes).to(device)).float()
         loss = nn.BCELoss()
         bce_loss[arm] = loss(output[arm], target)
         # ce_loss[arm] = loss(output[arm], first_node[arm].view(-1))
@@ -187,8 +188,8 @@ def min_var_loss(model, n_arms):
     m_v_loss = [None] * n_arms
     for arm in range(n_arms):
         zj = model.embeddings[arm].weight
-        u, vars_j_, v = torch.svd(zj - torch.mean(zj, axis=0), compute_uv=True)
-        m_v_loss[arm]  = torch.square(torch.min(vars_j_))
+        u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
+        m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
     return min(m_v_loss)
 
 
@@ -211,7 +212,7 @@ def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, 
     AE_loss = loss_AE_independent(output, n_arms, n_nodes, first_node)
     mvl = min_var_loss(model, n_arms)
     if torch.isnan(mvl):
-        epsilon = 0.1
+        epsilon = 0.001
     else:
         epsilon = 0.
     distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings, batch_size) / (mvl + epsilon)
@@ -251,27 +252,32 @@ padding = False
 # word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=False)
 # index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
 
-walks = utils.read_list_of_lists_from_csv("./walk_weighted_directed_footbal_v2.csv")
-vocabulary = prepare_vocab.get_vocabulary(walks)
-word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=padding)
-index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=padding)
+path = os.getcwd()
+walks = read_list_of_lists_from_csv( path +
+    "/walk_weighted_directed_footbal_v2.csv")
 
-            #
+# walks = read_list_of_lists_from_csv( path +
+#     "/walk_node21_32_removed.csv")
+
+vocabulary = get_vocabulary(walks)
+word_2_index = get_word2idx(vocabulary, padding=padding)
+index_2_word = get_idx2word(vocabulary, padding=padding)
+
 
 # Run the code with different values for the window, lambda and embedding size
 for w in [1]:
     for e in [2]:
-        for l in [0.5]:
+        for l in [1]:
             window = w
             batch_size = 2000
             embedding_size = e
             learning_rate = 0.001
-            n_epochs = 100
+            n_epochs = 500
             n_arms = 2
             lamda = l
 
             # receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
-            receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(walks, window=window)
+            receiver_tuples, emitter_tuples = emitter_receiver_tuples(walks, window=window)
             if padding:
                 n_nodes = len(vocabulary) + 1
             else:
@@ -280,12 +286,13 @@ for w in [1]:
             datasets = {}
 
             datasets['E'] = []
-            emitter_dataset = dataloader.EmitterReceiverDataset_debug(emitter_tuples, word_2_index)
+            emitter_dataset = EmitterReceiverDataset_debug(emitter_tuples, word_2_index)
             datasets['E'].append(emitter_dataset)
             datasets['E'].append(n_nodes)
 
             datasets['R'] = []
-            receiver_dataset = dataloader.EmitterReceiverDataset_debug(receiver_tuples, word_2_index)
+            receiver_dataset = EmitterReceiverDataset_debug(receiver_tuples,
+                                                            word_2_index)
             datasets['R'].append(receiver_dataset)
             datasets['R'].append(n_nodes)
 
@@ -321,18 +328,22 @@ for w in [1]:
                 print(f'epoch: {epoch + 1}/{n_epochs}, loss:{np.mean(losses):.4f}')
 
 
-            R = model.embeddings[0].weight.detach().numpy()
+            R = model.embeddings[0].weight.cpu().detach().numpy()
             R = pd.DataFrame(R, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             R.index = R.index.astype('str')
 
-            E = model.embeddings[1].weight.detach().numpy()
+            E = model.embeddings[1].weight.cpu().detach().numpy()
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "AE_BCE_lambda"+ str(l) + "_R_w" + str(window) + "_" + str(embedding_size) + "d.csv"
-            R.to_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/" + output_filename)
+            output_filename = "AE_BCE_lambda"+ str(l) + "_R_w" + str(window) \
+                              + "_bs" + str(batch_size) + "_" + str(
+                embedding_size) + "d.csv"
+            R.to_csv(path + '/' + output_filename)
 
-            output_filename = "AE_BCE_lambda"+ str(l) + "_E_w" + str(window) + "_" + str(embedding_size) + "d.csv"
-            E.to_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/" + output_filename)
+            output_filename = "AE_BCE_lambda"+ str(l) + "_E_w" + str(window) \
+                              + "_bs" + str(batch_size) + "_" + \
+                              str(embedding_size) + "d.csv"
+            E.to_csv("./" + output_filename)
 
-            print("finished w:" , w, "embedding size:", e)
+            print("finished w:", w, "embedding size:", e)
