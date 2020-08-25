@@ -9,14 +9,14 @@
       <change beforePath="$PROJECT_DIR$/../DMGI/models/DGI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/models/DGI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/models/DMGI.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/models/DMGI.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DMGI/utils/process.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DMGI/utils/process.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" beforeDir="false" afterPath="$PROJECT_DIR$/BiasedDirectedWeightedWalk.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" beforeDir="false" afterPath="$PROJECT_DIR$/Word2vec/prepare_vocab.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coupled_wv.py" beforeDir="false" afterPath="$PROJECT_DIR$/coupled_wv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/graph_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ipynb/Toy_w2vec.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Toy_w2vec.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plot_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/cell.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/2arm_encoder_toymodel.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/2arm_encoder_toymodel.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ipynb/Untitled.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/ipynb/Untitled.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../dgl/examples/pytorch/graphsage/train_sampling_unsupervised.py" beforeDir="false" afterPath="$PROJECT_DIR$/../dgl/examples/pytorch/graphsage/train_sampling_unsupervised.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -47,7 +47,28 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
-  <component name="RunManager" selected="Python.debug">
+  <component name="RunManager" selected="Python.new_E_R">
+    <configuration name="Emitter_receiver" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dgl" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Word2vec" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Word2vec/Emitter_receiver.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="debug" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="cell" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -90,40 +111,19 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="cell" />
+    <configuration name="new_E_R" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="dgl" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/DMGI" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Word2vec" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/DMGI/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="cell" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Word2vec/new_E_R.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -155,11 +155,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.new_E_R" />
+        <item itemvalue="Python.Emitter_receiver" />
         <item itemvalue="Python.debug" />
         <item itemvalue="Python.main (1)" />
         <item itemvalue="Python.train_sampling_unsupervised" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -177,74 +177,70 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="592" y="233" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1586212287776">
-      <screen x="0" y="23" width="1920" height="977" />
-    </state>
-    <state x="592" y="233" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1920.977@0.23.1920.977" timestamp="1586212287776" />
     <state width="1281" height="454" key="DebuggerActiveHint" timestamp="1593124035453">
       <screen x="0" y="23" width="1920" height="977" />
     </state>
     <state width="1281" height="454" key="DebuggerActiveHint/0.23.1920.977@0.23.1920.977" timestamp="1593124035453" />
-    <state width="1419" height="246" key="GridCell.Tab.0.bottom" timestamp="1591990476011">
+    <state width="1419" height="218" key="GridCell.Tab.0.bottom" timestamp="1598370784050">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.0.bottom/0.23.1440.797@0.23.1440.797" timestamp="1591990476011" />
+    <state width="1419" height="218" key="GridCell.Tab.0.bottom/0.23.1440.797@0.23.1440.797" timestamp="1598370784050" />
     <state width="1419" height="176" key="GridCell.Tab.0.bottom/0.23.1440.798@0.23.1440.798" timestamp="1590172035602" />
     <state width="1419" height="286" key="GridCell.Tab.0.bottom/0.23.1440.801@0.23.1440.801" timestamp="1590730494735" />
     <state width="1419" height="218" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1591023895191" />
     <state width="1894" height="308" key="GridCell.Tab.0.bottom/0.23.1920.977@0.23.1920.977" timestamp="1591641315088" />
-    <state width="1419" height="246" key="GridCell.Tab.0.center" timestamp="1591990476010">
+    <state width="1419" height="218" key="GridCell.Tab.0.center" timestamp="1598370784048">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.0.center/0.23.1440.797@0.23.1440.797" timestamp="1591990476010" />
+    <state width="1419" height="218" key="GridCell.Tab.0.center/0.23.1440.797@0.23.1440.797" timestamp="1598370784048" />
     <state width="1419" height="176" key="GridCell.Tab.0.center/0.23.1440.798@0.23.1440.798" timestamp="1590172035601" />
     <state width="1419" height="286" key="GridCell.Tab.0.center/0.23.1440.801@0.23.1440.801" timestamp="1590730494734" />
     <state width="1419" height="218" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1591023895190" />
     <state width="1894" height="308" key="GridCell.Tab.0.center/0.23.1920.977@0.23.1920.977" timestamp="1591641315087" />
-    <state width="1419" height="246" key="GridCell.Tab.0.left" timestamp="1591990476009">
+    <state width="1419" height="218" key="GridCell.Tab.0.left" timestamp="1598370784047">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.0.left/0.23.1440.797@0.23.1440.797" timestamp="1591990476009" />
+    <state width="1419" height="218" key="GridCell.Tab.0.left/0.23.1440.797@0.23.1440.797" timestamp="1598370784047" />
     <state width="1419" height="176" key="GridCell.Tab.0.left/0.23.1440.798@0.23.1440.798" timestamp="1590172035601" />
     <state width="1419" height="286" key="GridCell.Tab.0.left/0.23.1440.801@0.23.1440.801" timestamp="1590730494733" />
     <state width="1419" height="218" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1591023895190" />
     <state width="1894" height="308" key="GridCell.Tab.0.left/0.23.1920.977@0.23.1920.977" timestamp="1591641315086" />
-    <state width="1419" height="246" key="GridCell.Tab.0.right" timestamp="1591990476011">
+    <state width="1419" height="218" key="GridCell.Tab.0.right" timestamp="1598370784049">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.0.right/0.23.1440.797@0.23.1440.797" timestamp="1591990476011" />
+    <state width="1419" height="218" key="GridCell.Tab.0.right/0.23.1440.797@0.23.1440.797" timestamp="1598370784049" />
     <state width="1419" height="176" key="GridCell.Tab.0.right/0.23.1440.798@0.23.1440.798" timestamp="1590172035602" />
     <state width="1419" height="286" key="GridCell.Tab.0.right/0.23.1440.801@0.23.1440.801" timestamp="1590730494734" />
     <state width="1419" height="218" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1591023895190" />
     <state width="1894" height="308" key="GridCell.Tab.0.right/0.23.1920.977@0.23.1920.977" timestamp="1591641315087" />
-    <state width="1419" height="246" key="GridCell.Tab.1.bottom" timestamp="1591990478077">
+    <state width="1419" height="218" key="GridCell.Tab.1.bottom" timestamp="1598370784170">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.1.bottom/0.23.1440.797@0.23.1440.797" timestamp="1591990478077" />
+    <state width="1419" height="218" key="GridCell.Tab.1.bottom/0.23.1440.797@0.23.1440.797" timestamp="1598370784170" />
     <state width="1419" height="176" key="GridCell.Tab.1.bottom/0.23.1440.798@0.23.1440.798" timestamp="1590172037335" />
     <state width="1419" height="286" key="GridCell.Tab.1.bottom/0.23.1440.801@0.23.1440.801" timestamp="1590730498667" />
     <state width="1419" height="218" key="GridCell.Tab.1.bottom/0.23.1440.804@0.23.1440.804" timestamp="1591023895288" />
     <state width="1894" height="308" key="GridCell.Tab.1.bottom/0.23.1920.977@0.23.1920.977" timestamp="1591641315157" />
-    <state width="1419" height="246" key="GridCell.Tab.1.center" timestamp="1591990478076">
+    <state width="1419" height="218" key="GridCell.Tab.1.center" timestamp="1598370784169">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.1.center/0.23.1440.797@0.23.1440.797" timestamp="1591990478076" />
+    <state width="1419" height="218" key="GridCell.Tab.1.center/0.23.1440.797@0.23.1440.797" timestamp="1598370784169" />
     <state width="1419" height="176" key="GridCell.Tab.1.center/0.23.1440.798@0.23.1440.798" timestamp="1590172037334" />
     <state width="1419" height="286" key="GridCell.Tab.1.center/0.23.1440.801@0.23.1440.801" timestamp="1590730498664" />
     <state width="1419" height="218" key="GridCell.Tab.1.center/0.23.1440.804@0.23.1440.804" timestamp="1591023895287" />
     <state width="1894" height="308" key="GridCell.Tab.1.center/0.23.1920.977@0.23.1920.977" timestamp="1591641315156" />
-    <state width="1419" height="246" key="GridCell.Tab.1.left" timestamp="1591990478076">
+    <state width="1419" height="218" key="GridCell.Tab.1.left" timestamp="1598370784169">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.1.left/0.23.1440.797@0.23.1440.797" timestamp="1591990478076" />
+    <state width="1419" height="218" key="GridCell.Tab.1.left/0.23.1440.797@0.23.1440.797" timestamp="1598370784169" />
     <state width="1419" height="176" key="GridCell.Tab.1.left/0.23.1440.798@0.23.1440.798" timestamp="1590172037334" />
     <state width="1419" height="286" key="GridCell.Tab.1.left/0.23.1440.801@0.23.1440.801" timestamp="1590730498663" />
     <state width="1419" height="218" key="GridCell.Tab.1.left/0.23.1440.804@0.23.1440.804" timestamp="1591023895287" />
     <state width="1894" height="308" key="GridCell.Tab.1.left/0.23.1920.977@0.23.1920.977" timestamp="1591641315155" />
-    <state width="1419" height="246" key="GridCell.Tab.1.right" timestamp="1591990478077">
+    <state width="1419" height="218" key="GridCell.Tab.1.right" timestamp="1598370784170">
       <screen x="0" y="23" width="1440" height="797" />
     </state>
-    <state width="1419" height="246" key="GridCell.Tab.1.right/0.23.1440.797@0.23.1440.797" timestamp="1591990478077" />
+    <state width="1419" height="218" key="GridCell.Tab.1.right/0.23.1440.797@0.23.1440.797" timestamp="1598370784170" />
     <state width="1419" height="176" key="GridCell.Tab.1.right/0.23.1440.798@0.23.1440.798" timestamp="1590172037335" />
     <state width="1419" height="286" key="GridCell.Tab.1.right/0.23.1440.801@0.23.1440.801" timestamp="1590730498665" />
     <state width="1419" height="218" key="GridCell.Tab.1.right/0.23.1440.804@0.23.1440.804" timestamp="1591023895288" />
@@ -256,7 +252,6 @@
     <state x="513" y="171" width="894" height="829" key="search.everywhere.popup" timestamp="1594138003764">
       <screen x="0" y="23" width="1920" height="977" />
     </state>
-    <state x="385" y="144" width="670" height="676" key="search.everywhere.popup/0.23.1440.797@0.23.1440.797" timestamp="1586989771654" />
     <state x="513" y="171" width="894" height="829" key="search.everywhere.popup/0.23.1920.977@0.23.1920.977" timestamp="1594138003764" />
   </component>
   <component name="XDebuggerManager">
@@ -266,21 +261,6 @@
           <url>file://$PROJECT_DIR$/../dgl/python/dgl/nn/pytorch/conv/sageconv.py</url>
           <line>58</line>
           <option name="timeStamp" value="10" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>375</line>
-          <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>406</line>
-          <option name="timeStamp" value="16" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/BiasedDirectedWeightedWalk.py</url>
-          <line>431</line>
-          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
