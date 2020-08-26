@@ -324,11 +324,11 @@ for w in [1]:
             output_filename = "AE_NPP_BCE_lambda"+ str(l) + "_R_w" + str(window) \
                               + "_bs" + str(batch_size) + "_" + str(
                 embedding_size) + "d.csv"
-            R.to_csv(path + '/' + output_filename)
+            R.to_csv(path + '/' + "test_R.csv")
 
             output_filename = "AE_NPP_BCE_lambda"+ str(l) + "_E_w" + str(window) \
                               + "_bs" + str(batch_size) + "_" + \
                               str(embedding_size) + "d.csv"
-            E.to_csv(path + output_filename)
+            E.to_csv(path + "/" + "test_E.csv")
 
             print("finished w:", w, "embedding size:", e)

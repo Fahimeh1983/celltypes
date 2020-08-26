@@ -352,7 +352,8 @@ def plot_polar_source_target_relation(theta, r1, r2=None, **kwargs):
     return fig
 
 
-def plot_ER(E, R, figsize, plot_dim, annotation, E_color=None, R_color=None, E_marker='o', R_marker='x', use_type_colors=False):
+def plot_ER(E, R, figsize, plot_dim, annotation, E_color=None, R_color=None, E_marker='o', R_marker='x', \
+            use_type_colors=False, xlim=None, ylim=None, zlim=None):
     """
     plot right and left embeddings on one plot
     parameters
@@ -367,9 +368,12 @@ def plot_ER(E, R, figsize, plot_dim, annotation, E_color=None, R_color=None, E_m
     E_marker: E_marker
     R_marker: R_marker
     use_type_colors: if True, it will use "cluster_color" of each df for colors
+    xlim: tuple of x limits
+    ylim: tuple of y limits
     """
     fig = plt.figure(figsize=figsize)
     data = pd.concat((E, R))
+
     lim1 = np.floor(np.min(pd.concat((data['Z0'], data['Z1']))))
     lim2 = np.ceil(np.max(pd.concat((data['Z0'], data['Z1']))))
     if use_type_colors:
@@ -383,7 +387,10 @@ def plot_ER(E, R, figsize, plot_dim, annotation, E_color=None, R_color=None, E_m
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], data['Z2'][j], txt, size=10)
-        ax.set_zlim(lim1, lim2)
+        if zlim is not None:
+            ax.set_zlim(zlim)
+        else:
+            ax.set_zlim(lim1, lim2)
 
     else:
         ax = fig.add_subplot(111)
@@ -392,9 +399,15 @@ def plot_ER(E, R, figsize, plot_dim, annotation, E_color=None, R_color=None, E_m
         if annotation:
             for j, txt in enumerate(data.index.tolist()):
                 ax.text(data['Z0'][j], data["Z1"][j], txt, size=10)
+    if xlim is not None:
+        ax.set_xlim(xlim)
+    else:
+        ax.set_xlim(lim1, lim2)
 
-    ax.set_xlim(lim1, lim2)
-    ax.set_ylim(lim1, lim2)
+    if ylim is not None:
+        ax.set_ylim(ylim)
+    else:
+        ax.set_ylim(lim1, lim2)
 
     plt.legend()
     plt.show()

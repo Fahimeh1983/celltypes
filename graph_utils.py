@@ -11,10 +11,6 @@ import pandas as pd
 import networkx as nx
 import scipy as sp
 
-
-from stellargraph import StellarDiGraph, StellarGraph
-
-
 def check_wts(graph, weighted):
     '''
     Check the weights of a stellar graph object
