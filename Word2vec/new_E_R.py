@@ -6,7 +6,7 @@ import torch.nn as nn
 import pandas as pd
 import numpy as np
 from cell.graph_utils import *
-from utils import *
+from cell.utils import *
 from cell.analysis import *
 from cell.plot_utils import *
 from cell.Word2vec.dataloader import *
@@ -251,13 +251,13 @@ index_2_word = get_idx2word(vocabulary, padding=padding)
 
 # Run the code with different values for the window, lambda and embedding size
 for w in [1]:
-    for e in [2]:
+    for e in [5]:
         for l in [1]:
             window = w
             batch_size = 2000
             embedding_size = e
-            learning_rate = 0.001
-            n_epochs = 500
+            learning_rate = 0.0001
+            n_epochs = 200
             n_arms = 2
             lamda = l
 

@@ -253,21 +253,88 @@ def pairwise_ucleadian_dist_between_rows(a):
     return np.sqrt(np.einsum('ijk, ijk->ij', a-b, a-b))
 
 
-def best_fit_slope_and_intercept(xs,ys):
-    m = (((mean(xs)*mean(ys)) - mean(xs*ys)) /
-         ((mean(xs)*mean(xs)) - mean(xs*xs)))
-    b = mean(ys) - m*mean(xs)
-    return m, b
+def get_distance_between_eachrow_of_one_df_with_all_rows_of_other_df(df1, df2):
+    '''
+    df1: first data frame
+    df2: second data frame
 
-def squared_error(ys_orig,ys_line):
-    return sum((ys_line - ys_orig) * (ys_line - ys_orig))
+    return:
+    --------
+    df1_to_df2: distance between each row of the first dataframe with all the all the rows of the second
+    '''
+    df1_to_df2 = pd.DataFrame(index=df1.index.to_list(), columns=df1.index.to_list())
 
-def coefficient_of_determination(ys_orig,ys_line):
-    y_mean_line = [mean(ys_orig) for y in ys_orig]
-    squared_error_regr = squared_error(ys_orig, ys_line)
-    squared_error_y_mean = squared_error(ys_orig, y_mean_line)
-    return 1 - (squared_error_regr/squared_error_y_mean)
+    for idr1, row1 in df1.iterrows():
+        for idr2, row2 in df2.iterrows():
+            df1_to_df2.loc[idr1][idr2] = np.linalg.norm(row1 - row2)
+
+    df1_to_df2.index = df1_to_df2.index.astype(str)
+    df1_to_df2.columns = df1_to_df2.columns.astype(str)
+
+    return df1_to_df2
 
 
+def get_distance_node_importance(node_id, dist_df):
+    '''
+   get a distance matrix and for the given node_id, sort that row and find the importance of each node
+   the closer the node to a node_id, the higher the importance
+
+    Parameters
+    ----------
+    node_id: str
+    dist_df : a data frame of distance values
+
+    Returns
+    -------
+    dictinary with the all the nodes and their importance to the given node_id
+    '''
+    # get colnames of the negative sorted row for that given node_id (the closest node is the last in this list)
+    cols = dist_df.columns[np.argsort(-dist_df.loc[node_id])]
+
+    node_importance = {}
+    for idx, node in enumerate(cols):
+        node_importance[node] = idx + 1
+    return node_importance
 
 
+def get_distance_ndcg_score(node_id, E_to_R, adj, k):
+    '''
+    Get weight or adj matrix, note that in weight matrix all the edges are outgoing edges, so we compare that to E_to_R
+    distance matrix and not R_to_E
+
+    Parameters
+    ----------
+    node_id: str
+    E_to_R : emitter to receiver distance matrix
+    adj: outgoing adj matrix
+    k: ndcg rank
+
+    Returns
+    -------
+    returns ndcg score
+    '''
+
+    true_y = np.array([adj.loc[node_id].tolist()])
+    node_imp_dict = get_distance_node_importance(node_id, E_to_R)
+    predicted_y = np.array([[node_imp_dict[i] for i in adj.columns]])
+    return ndcg_score(true_y, predicted_y, k=k)
+
+
+# def best_fit_slope_and_intercept(xs,ys):
+#     m = (((mean(xs)*mean(ys)) - mean(xs*ys)) /
+#          ((mean(xs)*mean(xs)) - mean(xs*xs)))
+#     b = mean(ys) - m*mean(xs)
+#     return m, b
+#
+# def squared_error(ys_orig,ys_line):
+#     return sum((ys_line - ys_orig) * (ys_line - ys_orig))
+#
+# def coefficient_of_determination(ys_orig,ys_line):
+#     y_mean_line = [mean(ys_orig) for y in ys_orig]
+#     squared_error_regr = squared_error(ys_orig, ys_line)
+#     squared_error_y_mean = squared_error(ys_orig, y_mean_line)
+#     return 1 - (squared_error_regr/squared_error_y_mean)
+#
+#
+#
+#
