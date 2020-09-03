@@ -1,3 +1,5 @@
+import warnings; warnings.simplefilter('ignore')
+
 import torch
 import os
 import time
@@ -74,10 +76,8 @@ class EmitterReceiverCoupled(nn.Module):
         self.n_arms = n_arms
 
         self.embeddings = nn.ModuleList([nn.Embedding(n_nodes[i], embedding_size) for i in range(n_arms)])
-        self.linear1 = nn.ModuleList([nn.Linear(embedding_size,  n_nodes[i], bias=True) for i in range(n_arms)])
-        self.linear2 = nn.ModuleList([nn.Linear(n_nodes[i],  n_nodes[i], bias=True) for i in range(n_arms)])
+        self.linear = nn.ModuleList([nn.Linear(embedding_size,  n_nodes[i], bias=False) for i in range(n_arms)])
         self.sigmoid = nn.Sigmoid()
-        self.relu = nn.ReLU()
 
     def encoder(self, first_node, second_node, arm):
         '''
@@ -111,9 +111,7 @@ class EmitterReceiverCoupled(nn.Module):
         a torch tensor of size (batch_size, 1, n_nodes)
         '''
         first_embedding = torch.unbind(first_second_embeddings, dim=1)[0]
-        out = self.linear1[arm](first_embedding)
-        # out = self.relu(out)
-        # out = self.linear2[arm](out)
+        out = self.linear[arm](first_embedding)
         out = self.sigmoid(out)
         return out
 
@@ -131,7 +129,7 @@ class EmitterReceiverCoupled(nn.Module):
         return first_second_node_embeddings, output
 
 
-def loss_emitter_receiver_independent(first_second_node_embeddings):
+def loss_emitter_receiver_independent(first_second_node_embeddings, batch_size):
     '''
     gets the first and second node embeddings that were obtained from encoder (without passing them to decoder) and
     compute the distance between the first node of one arm and second node of the other arm. In the example above we
@@ -185,7 +183,7 @@ def min_var_loss(model, n_arms):
     return min(m_v_loss)
 
 
-def total_loss(first_second_node_embeddings, model, n_arms, output, n_nodes, first_node, lamda):
+def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda):
     '''
     Adding AE loss and the distance loss
     Args:
@@ -205,8 +203,7 @@ def total_loss(first_second_node_embeddings, model, n_arms, output, n_nodes, fir
         epsilon = 0.001
     else:
         epsilon = 0.
-    distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings) / (mvl + epsilon)
-    # print(distance_loss, AE_loss)
+    distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings, batch_size) / (mvl + epsilon)
     return distance_loss + lamda * AE_loss
 
 
@@ -244,7 +241,7 @@ padding = False
 # index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-walks = utils.read_list_of_lists_from_csv("./walk_weighted_directed_footbal_v2.csv")
+walks = read_list_of_lists_from_csv("./walk_node21_32_removed.csv")
 
 # walks = read_list_of_lists_from_csv( path +
 #     "/walk_node21_32_removed.csv")
@@ -262,7 +259,7 @@ for w in [1]:
             batch_size = 2000
             embedding_size = e
             learning_rate = 0.0001
-            n_epochs = 200
+            n_epochs = 1500
             n_arms = 2
             lamda = l
 
@@ -309,7 +306,7 @@ for w in [1]:
                     second_node = [torch.reshape(second_node[i], (batch_size, 1)) for i in range(len(second_node))]
                     optimizer.zero_grad()
                     first_second_node_embeddings, output = model(first_node, second_node)
-                    loss = total_loss(first_second_node_embeddings, model, n_arms, output, n_nodes, first_node, lamda)
+                    loss = total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda)
                     loss.backward()
                     optimizer.step()
                     losses.append(loss.item())
@@ -326,13 +323,13 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "soccer_2ldecoder_relu_sigmoid_BCE_lambda"+ str(l) + "_R_w" + str(window) \
-                              + "_bs" + str(batch_size) + "_" + str(
+            output_filename = "NPP_2ldecoder_relu_sigmoid_BCE_lambda"+ str(l) + "_R_w" + str(window) \
+                              + "_ep" + str(n_epochs) + "_" + str(
                 embedding_size) + "d.csv"
             R.to_csv(path + '/' + output_filename)
 
-            output_filename = "soccer_2ldecoder_relu_sigmoid_BCE_lambda"+ str(l) + "_E_w" + str(window) \
-                              + "_bs" + str(batch_size) + "_" + \
+            output_filename = "NPP_2ldecoder_relu_sigmoid_BCE_lambda"+ str(l) + "_E_w" + str(window) \
+                              + "_ep" + str(n_epochs) + "_" + \
                               str(embedding_size) + "d.csv"
             E.to_csv(path + "/" + output_filename)
 
