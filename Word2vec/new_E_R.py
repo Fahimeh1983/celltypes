@@ -76,7 +76,10 @@ class EmitterReceiverCoupled(nn.Module):
         self.n_arms = n_arms
 
         self.embeddings = nn.ModuleList([nn.Embedding(n_nodes[i], embedding_size) for i in range(n_arms)])
-        self.linear = nn.ModuleList([nn.Linear(embedding_size,  n_nodes[i], bias=False) for i in range(n_arms)])
+        self.linear1 = nn.ModuleList([nn.Linear(embedding_size,  n_nodes[i], bias=False) for i in range(n_arms)])
+        self.linear2 = nn.ModuleList([nn.Linear(n_nodes[i],  n_nodes[i], bias=False) for i in range(n_arms)])
+        self.elu = nn.ELU()
+        self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
     def encoder(self, first_node, second_node, arm):
@@ -111,7 +114,9 @@ class EmitterReceiverCoupled(nn.Module):
         a torch tensor of size (batch_size, 1, n_nodes)
         '''
         first_embedding = torch.unbind(first_second_embeddings, dim=1)[0]
-        out = self.linear[arm](first_embedding)
+        out = self.linear1[arm](first_embedding)
+        # out = self.relu(out)
+        # out = self.linear2[arm](out)
         out = self.sigmoid(out)
         return out
 
@@ -241,7 +246,8 @@ padding = False
 # index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-walks = read_list_of_lists_from_csv("./walk_node21_32_removed.csv")
+# walks = read_list_of_lists_from_csv("./walk_node21_32_removed.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_directed_weighted_sparseNPP.csv")
 
 # walks = read_list_of_lists_from_csv( path +
 #     "/walk_node21_32_removed.csv")
@@ -259,7 +265,7 @@ for w in [1]:
             batch_size = 2000
             embedding_size = e
             learning_rate = 0.0001
-            n_epochs = 1500
+            n_epochs = 500
             n_arms = 2
             lamda = l
 
@@ -323,12 +329,12 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "NPP_2ldecoder_relu_sigmoid_BCE_lambda"+ str(l) + "_R_w" + str(window) \
+            output_filename = "sparseNPP_BCE_lambda"+ str(l) + "_R_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + str(
                 embedding_size) + "d.csv"
             R.to_csv(path + '/' + output_filename)
 
-            output_filename = "NPP_2ldecoder_relu_sigmoid_BCE_lambda"+ str(l) + "_E_w" + str(window) \
+            output_filename = "sparseNPP_BCE_lambda"+ str(l) + "_E_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + \
                               str(embedding_size) + "d.csv"
             E.to_csv(path + "/" + output_filename)
