@@ -97,7 +97,7 @@ class EmitterReceiverCoupled(nn.Module):
         batch example
         '''
         batch_size = first_node.shape[0]
-        first_second_embeddings = [self.embeddings[arm](i) for i in [first_node, second_node]]
+        first_second_embeddings = [self.elu(self.embeddings[arm](i)) for i in [first_node, second_node]]
         first_second_embeddings = torch.stack(first_second_embeddings, dim=1)
         first_second_embeddings = first_second_embeddings.reshape(batch_size, 2, self.embedding_size)
         return first_second_embeddings
@@ -115,8 +115,8 @@ class EmitterReceiverCoupled(nn.Module):
         '''
         first_embedding = torch.unbind(first_second_embeddings, dim=1)[0]
         out = self.linear1[arm](first_embedding)
-        # out = self.relu(out)
-        # out = self.linear2[arm](out)
+        out = self.relu(out)
+        out = self.linear2[arm](out)
         out = self.sigmoid(out)
         return out
 
@@ -185,6 +185,8 @@ def min_var_loss(model, n_arms):
         zj = model.embeddings[arm].weight
         u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
         m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
+        #vars_j_ = torch.var(zj, 0)
+        #m_v_loss[arm] = torch.min(vars_j_)
     return min(m_v_loss)
 
 
@@ -247,7 +249,7 @@ padding = False
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
 # walks = read_list_of_lists_from_csv("./walk_node21_32_removed.csv")
-walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_directed_weighted_sparseNPP.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_11nodes_upto4con.csv")
 
 # walks = read_list_of_lists_from_csv( path +
 #     "/walk_node21_32_removed.csv")
@@ -265,7 +267,7 @@ for w in [1]:
             batch_size = 2000
             embedding_size = e
             learning_rate = 0.0001
-            n_epochs = 500
+            n_epochs = 2000
             n_arms = 2
             lamda = l
 
@@ -329,12 +331,12 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "sparseNPP_BCE_lambda"+ str(l) + "_R_w" + str(window) \
+            output_filename = "sparseNPP_upto4con_svd_elu_relu_sigmoid_BCE_lambda"+ str(l) + "_R_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + str(
                 embedding_size) + "d.csv"
             R.to_csv(path + '/' + output_filename)
 
-            output_filename = "sparseNPP_BCE_lambda"+ str(l) + "_E_w" + str(window) \
+            output_filename = "sparseNPP_upto4con_svd_elu_relu_sigmoid_BCE_lambda"+ str(l) + "_E_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + \
                               str(embedding_size) + "d.csv"
             E.to_csv(path + "/" + output_filename)
