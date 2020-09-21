@@ -3,6 +3,7 @@ import warnings; warnings.simplefilter('ignore')
 import torch
 import os
 import time
+import random
 import itertools
 import torch.nn as nn
 import pandas as pd
@@ -76,6 +77,7 @@ class EmitterReceiverCoupled(nn.Module):
         self.n_arms = n_arms
 
         self.embeddings = nn.ModuleList([nn.Embedding(n_nodes[i], embedding_size) for i in range(n_arms)])
+        self.batchnorm1d = nn.ModuleList([nn.BatchNorm1d(embedding_size, eps=1e-10, momentum=0.1, affine=False) for i in range(n_arms)])
         self.linear1 = nn.ModuleList([nn.Linear(embedding_size,  n_nodes[i], bias=False) for i in range(n_arms)])
         self.linear2 = nn.ModuleList([nn.Linear(n_nodes[i],  n_nodes[i], bias=False) for i in range(n_arms)])
         self.elu = nn.ELU()
@@ -97,8 +99,11 @@ class EmitterReceiverCoupled(nn.Module):
         batch example
         '''
         batch_size = first_node.shape[0]
-        first_second_embeddings = [self.elu(self.embeddings[arm](i)) for i in [first_node, second_node]]
-        first_second_embeddings = torch.stack(first_second_embeddings, dim=1)
+        x = self.embeddings[arm]
+        y = self.batchnorm1d[arm]
+        first = y(x(first_node.reshape(batch_size)))
+        second = y(x(second_node.reshape(batch_size)))
+        first_second_embeddings = torch.stack((first, second), dim=1)
         first_second_embeddings = first_second_embeddings.reshape(batch_size, 2, self.embedding_size)
         return first_second_embeddings
 
@@ -115,8 +120,8 @@ class EmitterReceiverCoupled(nn.Module):
         '''
         first_embedding = torch.unbind(first_second_embeddings, dim=1)[0]
         out = self.linear1[arm](first_embedding)
-        out = self.relu(out)
-        out = self.linear2[arm](out)
+        # out = self.relu(out)
+        # out = self.linear2[arm](out)
         out = self.sigmoid(out)
         return out
 
@@ -127,7 +132,16 @@ class EmitterReceiverCoupled(nn.Module):
         for arm in range(self.n_arms):
             first_second_embeddings = self.encoder(first_node[arm], second_node[arm], arm)
             first_second_node_embeddings[arm] = first_second_embeddings
-            output[arm] = self.decoder(first_second_embeddings, arm)
+
+        # batch_size = first_second_node_embeddings[arm].shape[0]
+        # all_points = torch.stack((first_second_node_embeddings[0],
+        #                           first_second_node_embeddings[1]), dim=0).reshape(2 * batch_size, 2, self.embedding_size)
+
+        # total_mean = all_points.mean(dim=[0,1])
+
+        # for arm in range(self.n_arms):
+        #     first_second_node_embeddings[arm] = first_second_node_embeddings[arm] - total_mean
+            output[arm] = self.decoder(first_second_node_embeddings[arm], arm)
 
         first_second_node_embeddings[1] = torch.flip(first_second_node_embeddings[1], [1])
 
@@ -164,15 +178,14 @@ def loss_AE_independent(output, n_arms, n_nodes, first_node):
 
     bce_loss = [None] * n_arms
     for arm in range(n_arms):
-        target = (first_node[arm] == torch.arange(n_nodes).reshape(1,n_nodes).to(device)).float()
+        target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes).to(device)).float()
         loss = nn.BCELoss()
         bce_loss[arm] = loss(output[arm], target)
-        # ce_loss[arm] = loss(output[arm], first_node[arm].view(-1))
 
     return sum(bce_loss)
 
 
-def min_var_loss(model, n_arms):
+def min_var_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms):
     '''
     Compute the variation of embeddings in all direction and take the min
     Args:
@@ -180,17 +193,25 @@ def min_var_loss(model, n_arms):
         n_arms: number of arms
     Returns:
     '''
-    m_v_loss = [None] * n_arms
-    for arm in range(n_arms):
-        zj = model.embeddings[arm].weight
-        u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
-        m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
-        #vars_j_ = torch.var(zj, 0)
-        #m_v_loss[arm] = torch.min(vars_j_)
-    return min(m_v_loss)
+
+    zj = torch.stack((first_second_node_embeddings[0],
+                      first_second_node_embeddings[1]),
+                     dim=0).reshape(2 * batch_size, 2, embedding_size)
+
+    u, vars_j_, v = torch.svd(zj, compute_uv=True)
+    m_v_loss = torch.sqrt(torch.min(vars_j_))
+    return m_v_loss
+
+    # m_v_loss = [None] * n_arms
+    # for arm in range(n_arms):
+    #     zj = first_second_node_embeddings[arm].reshape(2 * batch_size, embedding_size)
+    #     u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
+    #     m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
+    #
+    # return min(m_v_loss)
 
 
-def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda):
+def total_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms, output, n_nodes, first_node, lamda):
     '''
     Adding AE loss and the distance loss
     Args:
@@ -205,7 +226,7 @@ def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, 
     Returns:
     '''
     AE_loss = loss_AE_independent(output, n_arms, n_nodes, first_node)
-    mvl = min_var_loss(model, n_arms)
+    mvl = min_var_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms)
     if torch.isnan(mvl):
         epsilon = 0.001
     else:
@@ -216,43 +237,10 @@ def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, 
 
 
 # Reading the walks for the graph
-
-# p = 1
-# q = 1
-# N = 1
 padding = False
-# length = 10000
-# roi = "VISp"
-# walk_filename = "walk_node21_32_removed.csv"
-# project_name = "NPP_GNN_project"
-# layer_class = "single_layer"
-# layer = "base_unnormalized_allcombined"
-# walk_type= "Directed_Weighted_node2vec"
-#
-# walk_dir = utils.get_walk_dir(roi,
-#                               project_name,
-#                               N,
-#                               length,
-#                               p,
-#                               q,
-#                               layer_class,
-#                               layer,
-#                               walk_type)
-#
-# corpus = utils.read_list_of_lists_from_csv(os.path.join(walk_dir, walk_filename))
-# vocabulary = prepare_vocab.get_vocabulary(corpus)
-#
-# print(f'lenght of vocabulary: {len(vocabulary)}')
-
-# word_2_index = prepare_vocab.get_word2idx(vocabulary, padding=False)
-# index_2_word = prepare_vocab.get_idx2word(vocabulary, padding=False)
-
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-# walks = read_list_of_lists_from_csv("./walk_node21_32_removed.csv")
-walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_11nodes_upto4con.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_11nodes_test_0.csv")
 
-# walks = read_list_of_lists_from_csv( path +
-#     "/walk_node21_32_removed.csv")
 
 vocabulary = get_vocabulary(walks)
 word_2_index = get_word2idx(vocabulary, padding=padding)
@@ -267,12 +255,17 @@ for w in [1]:
             batch_size = 2000
             embedding_size = e
             learning_rate = 0.0001
-            n_epochs = 2000
+            n_epochs = 500
             n_arms = 2
             lamda = l
 
             # receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
             receiver_tuples, emitter_tuples = emitter_receiver_tuples(walks, window=window)
+
+            temp = list(zip(emitter_tuples, receiver_tuples))
+            random.shuffle(temp)
+            emitter_tuples, receiver_tuples = zip(*temp)
+
             if padding:
                 n_nodes = len(vocabulary) + 1
             else:
@@ -314,7 +307,7 @@ for w in [1]:
                     second_node = [torch.reshape(second_node[i], (batch_size, 1)) for i in range(len(second_node))]
                     optimizer.zero_grad()
                     first_second_node_embeddings, output = model(first_node, second_node)
-                    loss = total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda)
+                    loss = total_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms, output, n_nodes, first_node, lamda)
                     loss.backward()
                     optimizer.step()
                     losses.append(loss.item())
@@ -331,12 +324,12 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "sparseNPP_upto4con_svd_elu_relu_sigmoid_BCE_lambda"+ str(l) + "_R_w" + str(window) \
+            output_filename = "test1_hope_11nodes_lambda"+ str(l) + "_R_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + str(
                 embedding_size) + "d.csv"
             R.to_csv(path + '/' + output_filename)
 
-            output_filename = "sparseNPP_upto4con_svd_elu_relu_sigmoid_BCE_lambda"+ str(l) + "_E_w" + str(window) \
+            output_filename = "test1_hope_11nodes_lambda"+ str(l) + "_E_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + \
                               str(embedding_size) + "d.csv"
             E.to_csv(path + "/" + output_filename)
