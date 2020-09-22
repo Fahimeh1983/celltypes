@@ -96,18 +96,11 @@ class EmitterReceiverCoupled(nn.Module):
         '''
         batch_size = first_node.shape[0]
         x = self.embeddings[arm]
-        # y = self.batchnorm1d[arm]
         first = x(first_node.reshape(batch_size))
         second = x(second_node.reshape(batch_size))
         first_second_embeddings = torch.stack((first, second), dim=1)
         first_second_embeddings = first_second_embeddings.reshape(batch_size, 2, self.embedding_size)
         return first_second_embeddings
-
-        # batch_size = first_node.shape[0]
-        # first_second_embeddings = [self.embeddings[arm](i) for i in [first_node, second_node]]
-        # first_second_embeddings = torch.stack(first_second_embeddings, dim=1)
-        # first_second_embeddings = first_second_embeddings.reshape(batch_size, 2, self.embedding_size)
-        # return first_second_embeddings
 
     def decoder(self, first_second_embeddings, arm):
         '''
@@ -132,7 +125,17 @@ class EmitterReceiverCoupled(nn.Module):
         for arm in range(self.n_arms):
             first_second_embeddings = self.encoder(first_node[arm], second_node[arm], arm)
             first_second_node_embeddings[arm] = first_second_embeddings
-            output[arm] = self.decoder(first_second_embeddings, arm)
+
+        batch_size = first_second_node_embeddings[arm].shape[0]
+        all_points = torch.stack((first_second_node_embeddings[0],
+                                  first_second_node_embeddings[1]),
+                                 dim=0).reshape(2 * batch_size, 2, self.embedding_size)
+
+        total_mean = all_points.mean(dim=[0,1])
+
+        for arm in range(self.n_arms):
+            first_second_node_embeddings[arm] = first_second_node_embeddings[arm] - total_mean
+            output[arm] = self.decoder(first_second_node_embeddings[arm], arm)
 
         first_second_node_embeddings[1] = torch.flip(first_second_node_embeddings[1], [1])
 
@@ -177,7 +180,7 @@ def loss_AE_independent(output, n_arms, n_nodes, first_node):
     return sum(bce_loss)
 
 
-def min_var_loss(model, n_arms):
+def min_var_loss(first_second_node_embeddings, batch_size, embedding_size):
     '''
     Compute the variation of embeddings in all direction and take the min
     Args:
@@ -185,15 +188,19 @@ def min_var_loss(model, n_arms):
         n_arms: number of arms
     Returns:
     '''
-    m_v_loss = [None] * n_arms
-    for arm in range(n_arms):
-        zj = model.embeddings[arm].weight
-        u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
-        m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
-    return min(m_v_loss)
+
+    # zj = torch.stack((model.embeddings[0].weight,
+    #                   model.embeddings[1].weight),
+    #                  dim=0).reshape(2 * 11, embedding_size)
+    zj = torch.stack((first_second_node_embeddings[0],
+                      first_second_node_embeddings[1]),
+                     dim=0).reshape(4 * batch_size, embedding_size)
+    u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
+    m_v_loss = torch.sqrt(torch.min(vars_j_))
+    return m_v_loss
 
 
-def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda):
+def total_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms, output, n_nodes, first_node, lamda):
     '''
     Adding AE loss and the distance loss
     Args:
@@ -208,7 +215,7 @@ def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, 
     Returns:
     '''
     AE_loss = loss_AE_independent(output, n_arms, n_nodes, first_node)
-    mvl = min_var_loss(model, n_arms)
+    mvl = min_var_loss(first_second_node_embeddings, batch_size, embedding_size)
     if torch.isnan(mvl):
         epsilon = 0.001
     else:
@@ -222,7 +229,7 @@ def total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, 
 padding = False
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_11nodes_test_0.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_11nodes_test1.csv")
 
 vocabulary = get_vocabulary(walks)
 word_2_index = get_word2idx(vocabulary, padding=padding)
@@ -241,7 +248,6 @@ for w in [1]:
             n_arms = 2
             lamda = l
 
-            # receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
             receiver_tuples, emitter_tuples = emitter_receiver_tuples(walks, window=window)
             if padding:
                 n_nodes = len(vocabulary) + 1
@@ -284,7 +290,7 @@ for w in [1]:
                     second_node = [torch.reshape(second_node[i], (batch_size, 1)) for i in range(len(second_node))]
                     optimizer.zero_grad()
                     first_second_node_embeddings, output = model(first_node, second_node)
-                    loss = total_loss(first_second_node_embeddings, batch_size, model, n_arms, output, n_nodes, first_node, lamda)
+                    loss = total_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms, output, n_nodes, first_node, lamda)
                     loss.backward()
                     optimizer.step()
                     losses.append(loss.item())
@@ -301,12 +307,12 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "biased_run0_test_0"+ str(l) + "_R_w" + str(window) \
+            output_filename = "test1"+ str(l) + "_R_w" + str(window) \
                               + "_bs" + str(batch_size) + "_" + str(
                 embedding_size) + "d.csv"
             R.to_csv(path + '/' + output_filename)
 
-            output_filename = "biased_run0_test_0"+ str(l) + "_E_w" + str(window) \
+            output_filename = "test1"+ str(l) + "_E_w" + str(window) \
                               + "_bs" + str(batch_size) + "_" + \
                               str(embedding_size) + "d.csv"
             E.to_csv(path + "/" + output_filename)
