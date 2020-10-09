@@ -210,7 +210,7 @@ def loss_emitter_receiver_independent(first_second_node_embeddings):
     '''
 
     dist_squared = torch.norm(first_second_node_embeddings[0] - first_second_node_embeddings[1], dim=2) ** 2
-    loss = torch.mean(dist_squared)
+    loss = torch.sum(dist_squared)
 
     return loss
 
@@ -284,7 +284,7 @@ def total_loss(first_second_node_embeddings, n_arms, output, n_nodes, first_node
         epsilon = 0.
     mean_dist = loss_emitter_receiver_independent(first_second_node_embeddings)
     distance_loss = mean_dist
-    return mean_dist, distance_loss, bothmvl, mvl, AE_loss, (distance_loss / mvl) + (lamda * AE_loss)
+    return mean_dist, distance_loss, bothmvl, mvl, AE_loss, lamda * (distance_loss / mvl) + (1 - lamda) * AE_loss
 
 
 ##############################################
@@ -302,13 +302,13 @@ index_2_word = get_idx2word(vocabulary, padding=padding)
 
 
 # Run the code with different values for the window, lambda and embedding size
-for w in [1]: # window size
+for w in [2]: # window size
     for e in [3]: # embedding_size
-        for l in [0.5]: # lambda in the loss function
+        for l in [0.99]: # lambda in the loss function
             window = w
             batch_size = 2000
             embedding_size = e
-            learning_rate = 0.0001
+            learning_rate = 0.00001
             n_epochs = 3000
             n_arms = 2
             lamda = l
@@ -409,7 +409,7 @@ for w in [1]: # window size
                                      index=index_2_word.values())
                     E.index = E.index.astype('str')
 
-                    prefix = "job12"
+                    prefix = "job14"
                     output_filename = prefix + "_" + str(epoch) + "_R_w" + str(window) + "_" + \
                                       str(embedding_size) + "d.csv"
                     R.to_csv(path + '/' + output_filename)
