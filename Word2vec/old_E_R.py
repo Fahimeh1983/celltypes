@@ -128,7 +128,7 @@ class EmitterReceiverCoupled(nn.Module):
         tmp = []
         if arm == 0: # I am normalizing only one of the arms
             for node_index_list in [first_node.reshape(batch_size), second_node.reshape(batch_size),
-                                    index_2_word_tensor]:
+                                index_2_word_tensor]:
                 out = self.embeddings[arm](node_index_list)
                 # out = self.encode_l1[arm](out)
                 # out = self.tanh(out)
@@ -210,7 +210,7 @@ def loss_emitter_receiver_independent(first_second_node_embeddings):
     '''
 
     dist_squared = torch.norm(first_second_node_embeddings[0] - first_second_node_embeddings[1], dim=2) ** 2
-    loss = torch.sum(dist_squared)
+    loss = torch.mean(dist_squared)
 
     return loss
 
@@ -284,7 +284,7 @@ def total_loss(first_second_node_embeddings, n_arms, output, n_nodes, first_node
         epsilon = 0.
     mean_dist = loss_emitter_receiver_independent(first_second_node_embeddings)
     distance_loss = mean_dist
-    return mean_dist, distance_loss, bothmvl, mvl, AE_loss, lamda * (distance_loss / mvl) + (1 - lamda) * AE_loss
+    return mean_dist, distance_loss, bothmvl, mvl, AE_loss,  lamda * (distance_loss / mvl) + (1 - lamda) * AE_loss
 
 
 ##############################################
@@ -294,7 +294,7 @@ def total_loss(first_second_node_embeddings, n_arms, output, n_nodes, first_node
 padding = False
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_node21_32_removed.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_weighted_directed_footbal_v2.csv")
 
 vocabulary = get_vocabulary(walks)
 word_2_index = get_word2idx(vocabulary, padding=padding)
@@ -302,13 +302,13 @@ index_2_word = get_idx2word(vocabulary, padding=padding)
 
 
 # Run the code with different values for the window, lambda and embedding size
-for w in [2]: # window size
-    for e in [3]: # embedding_size
-        for l in [0.99]: # lambda in the loss function
+for w in [1]: # window size
+    for e in [2]: # embedding_size
+        for l in [0.8]: # lambda in the loss function
             window = w
             batch_size = 2000
             embedding_size = e
-            learning_rate = 0.00001
+            learning_rate = 0.0001
             n_epochs = 3000
             n_arms = 2
             lamda = l
@@ -396,7 +396,8 @@ for w in [2]: # window size
                       f'mvl0:{bothmv[0]:.4f}, '
                       f'mvl1:{bothmv[1]:.4f}, '
                       # f'mvl2:{bothmv[2]:.4f}, '
-                      f'loss:{np.mean(losses):.4f}')
+                      f'loss:{np.mean(losses):.4f},'
+                      f'AE:{AE:.4f}')
 
                 if ((epoch % 100 == 0) & (epoch >0)):
                     R = all_node_emb[0].cpu().detach().numpy()
@@ -409,7 +410,7 @@ for w in [2]: # window size
                                      index=index_2_word.values())
                     E.index = E.index.astype('str')
 
-                    prefix = "job14"
+                    prefix = "job14_bnarm0"
                     output_filename = prefix + "_" + str(epoch) + "_R_w" + str(window) + "_" + \
                                       str(embedding_size) + "d.csv"
                     R.to_csv(path + '/' + output_filename)
