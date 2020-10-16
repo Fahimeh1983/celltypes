@@ -77,7 +77,7 @@ class EmitterReceiverCoupled(nn.Module):
         self.n_nodes = n_nodes
         self.embedding_size = embedding_size
         self.n_arms = n_arms
-        self.l1_size = 10 # adding another layer to decoder if needed
+        self.l1_size = 5 # adding another layer to decoder if needed
 
         # encode, an embedding layer followed by a batch normalization
         self.embeddings = nn.ModuleList(
@@ -126,7 +126,7 @@ class EmitterReceiverCoupled(nn.Module):
         # here we are passing the index of first node and second node for all the points in the batch as well as the
         # index of all nodes of the graph
         tmp = []
-        if arm == 0: # I am normalizing only one of the arms
+        if arm == 1: # I am normalizing only one of the arms
             for node_index_list in [first_node.reshape(batch_size), second_node.reshape(batch_size),
                                 index_2_word_tensor]:
                 out = self.embeddings[arm](node_index_list)
@@ -211,6 +211,7 @@ def loss_emitter_receiver_independent(first_second_node_embeddings):
 
     dist_squared = torch.norm(first_second_node_embeddings[0] - first_second_node_embeddings[1], dim=2) ** 2
     loss = torch.mean(dist_squared)
+    # loss = torch.mean(torch.unique(dist_squared.reshape(4000)))
 
     return loss
 
@@ -294,7 +295,9 @@ def total_loss(first_second_node_embeddings, n_arms, output, n_nodes, first_node
 padding = False
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_weighted_directed_footbal_v2.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_row_normal_new_npp_adj.csv")
+# walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/GNN/dat/walks/jsd/N_1_l_1000_p_1_q_1/walk_row_normal_new_npp_adj.csv")
+
 
 vocabulary = get_vocabulary(walks)
 word_2_index = get_word2idx(vocabulary, padding=padding)
@@ -303,12 +306,12 @@ index_2_word = get_idx2word(vocabulary, padding=padding)
 
 # Run the code with different values for the window, lambda and embedding size
 for w in [1]: # window size
-    for e in [2]: # embedding_size
-        for l in [0.8]: # lambda in the loss function
+    for e in [3]: # embedding_size
+        for l in [0.99]: # lambda in the loss function
             window = w
             batch_size = 2000
             embedding_size = e
-            learning_rate = 0.0001
+            learning_rate = 0.001
             n_epochs = 3000
             n_arms = 2
             lamda = l
@@ -410,7 +413,7 @@ for w in [1]: # window size
                                      index=index_2_word.values())
                     E.index = E.index.astype('str')
 
-                    prefix = "job14_bnarm0"
+                    prefix = "job26_row_normal_new_npp"
                     output_filename = prefix + "_" + str(epoch) + "_R_w" + str(window) + "_" + \
                                       str(embedding_size) + "d.csv"
                     R.to_csv(path + '/' + output_filename)
