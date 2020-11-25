@@ -7,7 +7,8 @@ __email__ = 'fahimeh.baftizadeh@gmail.com'
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
-
+import random
+from random import random
 import numpy as np
 import pandas as pd
 
@@ -61,24 +62,6 @@ def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
 
-def Divide_each_Row_by_colsum(df):
-    """
-    Divide each row by column sum
-
-    Parameters
-    ----------
-    df: Data frame
-
-    Returns
-    -------
-    df_normal: return the column-sum normalized df
-    """
-
-    df_normal = df.div(df.sum(axis=1), axis=0)
-
-    return df_normal
-
-
 
 def Check_Symmetric(a, rtol=1e-05, atol=1e-08):
 
@@ -94,3 +77,21 @@ def Check_Symmetric(a, rtol=1e-05, atol=1e-08):
     TRUE or FALSE
     """
     return np.allclose(a, a.T, rtol=rtol, atol=atol)
+
+
+
+
+def weighted_choice(objects, weights):
+    """ returns randomly an element from the sequence of 'objects',
+        the likelihood of the objects is weighted according
+        to the sequence of 'weights', i.e. percentages."""
+
+    weights = np.array(weights, dtype=np.float64)
+    sum_of_weights = weights.sum()
+    # standardization:
+    np.multiply(weights, 1 / sum_of_weights, weights)
+    weights = weights.cumsum()
+    x = random()
+    for i in range(len(weights)):
+        if x < weights[i]:
+            return objects[i]

@@ -9,7 +9,9 @@ from cell import utils, math_utils
 import numpy as np
 import pandas as pd
 import networkx as nx
-import scipy as sp
+import random
+from collections import Counter
+from sinkhorn_knopp import sinkhorn_knopp as skp
 
 def check_wts(graph, weighted):
     '''
@@ -121,7 +123,6 @@ def build_edge_list(weight_matrix, threshold, directed):
 
     if threshold is not None:
         weight_matrix = weight_matrix[weight_matrix > threshold]
-
     if not directed:
         if not symmetric:
             print("When undirected, the matrix must be symmetirc")
@@ -335,3 +336,319 @@ def split_train_test_graph(adj, test_percent):
         train_adj.append([0. if i in select_random_index else r for i, r in enumerate(row)])
 
     return np.array(train_adj), np.array(test_adj), np.array(test_nodes)
+
+
+def get_frequency_tables(walks, node_list):
+    """
+
+    parameters
+    ----------
+    walks: list of list of walks
+    node_list: list of node names
+
+    return
+    ----------
+    frequency table for each node
+    """
+
+    freq = {k:Counter() for k in node_list}
+
+    for walk in walks:
+        n_i = walk[0]
+        freq[n_i].update(walk[1:])
+    return freq
+
+def get_probability_from_freq_tables(frequeny_dict):
+    """
+
+    parameters
+    ----------
+    walks: list of list of walks
+    node_list: list of node names
+
+    return
+    ----------
+    frequency table for each node
+    """
+    prob = {}
+    total = sum(frequeny_dict.values(), 0.0)
+    # print(total)
+    for key in frequeny_dict:
+        prob[key] = frequeny_dict[key] / total
+    return prob
+
+
+def get_negative_probability_from_probability(probability, softmax_T=1):
+    """
+
+    parameters
+    ----------
+    probability:
+    softmax_T:
+
+    return
+    ----------
+    """
+    negative_prob = {}
+    for key in probability:
+        negative_prob[key] = 1 - probability[key]
+
+    # Apply softmax for forward
+    for key in negative_prob:
+        negative_prob[key] = np.exp(negative_prob[key] / softmax_T)
+
+    total = sum(negative_prob.values(), 0.0)
+    for key in negative_prob:
+        negative_prob[key] /= total
+    return negative_prob
+
+
+def return_soccer_weight_matrix():
+    '''
+    It return a toy model of a soccer graph with 12 nodes, you can manuallu changes
+    weights below if you wish
+    '''
+
+    edges = pd.DataFrame([['1', '2', 0.8],
+                          ['1', '3', 0.1],
+                          ['1', '4', 0.05],
+                          ['1', '7', 0.05],
+                          ['2', '6', 0.7],
+                          ['2', '9', 0.3],
+                          ['3', '9', 0.5],
+                          ['3', '7', 0.5],
+                          ['4', '8', 0.95],
+                          ['4', '5', 0.05],
+                          ['5', '1', 1],
+                          ['6', '9', 0.2],
+                          ['6', '10', 0.8],
+                          ['7', '10', 0.15],
+                          ['7', '11', 0.85],
+                          ['8', '5', 0.55],
+                          ['8', '4', 0.45],
+                          ['9', '10', 1],
+                          ['10', '11', 0.6],
+                          ['10', '6', 0.4],
+                          ['11', '8', 0.1],
+                          ['11', '5', 0.9]], columns=['source', 'target', 'weight'])
+
+    weight_mat = return_weight_mat_from_edgelist(edges, directed=True)
+    weight_mat = weight_mat.loc[[str(i) for i in range(1, 12)]][[str(i) for i in range(1, 12)]]
+
+    return weight_mat
+
+
+def return_a_toy_graph_weight_mat(n_nodes, min_connection, max_connection):
+    '''
+    takes number of nodes and min and max number of connections per node and generate a
+    toy graph weight matrix with random connections
+
+    Args:
+    -----
+    n_nodes
+    min_connection
+    max_connection
+
+    return
+    ------
+    weight mat
+
+    '''
+    total_inter = np.zeros((n_nodes, n_nodes))
+
+    for irow, row in enumerate(total_inter):
+        # generate index of random connections
+        n_connections = random.sample(range(min_connection, max_connection), 1)
+        con = random.sample([t for t in range(0, n_nodes) if t != irow], n_connections[0])
+        # generate weights of random connections that adds up to 1
+        wei = np.random.dirichlet(np.ones(n_connections), size=1)[0]
+        for ic, c in enumerate(con):
+            total_inter[irow][[c]] = wei[ic]
+
+    total_inter = pd.DataFrame(total_inter)
+    return total_inter
+
+
+def read_npp_interaction_matrices(version, which_layers=None):
+    '''
+    Read the interaction matrices of npp and return the combined adj matrix
+    if which_layer is none then it read all the layers and combine them
+
+    Args:
+    ----
+    which_layers: a list of layer names that we want to read and combine
+    '''
+
+    npp_adj = np.zeros((93, 93))
+    if which_layers is None:
+        which_layers = utils.get_npp_visp_layers(version)
+
+    for layer in which_layers:
+        path = utils.get_npp_visp_interaction_mat_path(version=version, layer=layer)
+        tmp_inter = pd.read_csv(path, index_col="Unnamed: 0")
+        npp_adj = npp_adj + tmp_inter.values
+
+    return npp_adj
+
+def read_npp_interaction_df(version, which_layers, index, columns):
+    '''
+    Read the interaction matrices of npp and return the combined adj matrix
+    if which_layer is none then it read all the layers and combine them
+
+    Args:
+    ----
+    which_layers: a list of layer names that we want to read and combine
+    '''
+
+    df = read_npp_interaction_matrices(version, which_layers)
+    df = pd.DataFrame(df, index=index, columns=columns)
+
+    return df
+
+
+def Keep_only_k_largest_value_of_each_row(mat, k):
+    '''
+    Take a data frame, for each row it sorts the values of that row and only keeps
+    the highest k member for each row and the rest will be set to zero
+
+    Args:
+    -----
+    mat: A data frame of adj matrix for example
+    k: how many members from each row should be kept, the rest will be set to zero
+    '''
+    df = mat.copy()
+    df.index.name = 'index'
+    melted = pd.melt(df.reset_index(), id_vars='index')
+    melted.columns = ["row", 'col', 'value']
+    melted["rank"] = melted.groupby("row")["value"].rank("dense", ascending=False)
+    melted['keep'] = np.where(melted['rank'] <= k, melted['value'], 0.)
+    new_df = melted.pivot(index='row', columns='col', values='keep')
+    new_df = new_df.loc[[i for i in df.index.tolist()]][[i for i in df.columns.tolist()]]
+
+    return new_df
+
+def Keep_only_k_largest_value_of_each_row_and_each_column(mat, k):
+    '''
+    Take a data frame, for each row it sorts the values of that row and only keeps
+    the highest k member for each row and the rest will be set to zero
+
+    Args:
+    -----
+    mat: A data frame
+    k: how many members from each row and column should be kept, the rest will be set to zero
+    '''
+    df = mat.copy()
+    df.index.name = 'index'
+    melted = pd.melt(df.reset_index(), id_vars='index')
+    melted.columns = ["row", 'col', 'value']
+    melted["rank_row"] = melted.groupby("row")["value"].rank("dense", ascending=False)
+    melted["rank_col"] = melted.groupby("col")["value"].rank("dense", ascending=False)
+    melted['keep'] = np.where((melted['rank_row'] <= k) | (melted['rank_col'] <= k), melted['value'], 0.)
+    melted = melted.pivot(index='row', columns='col', values='keep')
+    melted = melted.loc[[i for i in df.index.tolist()]][[i for i in df.columns.tolist()]]
+    return melted
+
+def Divide_each_Row_by_colsum(df):
+    """
+    Divide each row by column sum
+
+    Parameters
+    ----------
+    df: Data frame
+
+    Returns
+    -------
+    df_normal: return the column-sum normalized df
+    """
+
+    df_normal = df.div(df.sum(axis=1), axis=0)
+
+    return df_normal
+
+
+def apply_doubly_stochastic(adj):
+    '''
+    Args:
+    -----
+    adj: a dataframe that we want to make doubly stochastic
+
+    return:
+    -------
+    ds: a doubly stochastic dataframe
+    '''
+
+    # First add a small value to members to get rid of zeros
+    df = adj.copy()
+    df = df + 0.00001
+
+    sk = skp.SinkhornKnopp()
+    # Apply SinkhornKnopp
+    ds = sk.fit(df)
+    ds = pd.DataFrame(ds)
+    ds.index = df.index.astype(str)
+    ds.columns = df.columns.astype(str)
+    return ds
+
+
+def get_column_index_of_sorted_rows(df):
+    '''
+    get a dataframe and sort each row and return the column index of each row in
+    a new dataframe
+    '''
+    top_n = df.shape[0]
+    sorted_rows_df = pd.DataFrame({n: df.T[col].nlargest(top_n).index.tolist() for n, col in enumerate(df.T)}).T
+    sorted_rows_df.index = df.index
+    return sorted_rows_df
+
+
+def mask_allbut_k_percentile_of_each_row(df, percentile):
+    '''
+    get the df, sort each row and find the sorted row. For each row compute
+    the sum and find the sum*percentile value as a traget. Then for each row
+    keep the highest values that adds up to that target value. Then return a
+    dictionary that has the keys as index of the df and the values are the column
+    that should be kept for that row of df
+    '''
+    data = df.copy()
+
+    sorted_column_data = get_column_index_of_sorted_rows(df)
+
+    data['sum'] = data.sum(axis=1)
+    data['top_percentile'] = data['sum'] * percentile
+
+    mask = sorted_column_data.stack().reset_index()
+    mask = mask.rename(columns={"level_0": "index", "level_1": "keep", 0: "column"}, errors="raise")
+    mask['keep'] = 0
+    mask['column'] = mask['column'].astype(str)
+    mask['index'] = mask['index'].astype(str)
+
+    for idx, row in sorted_column_data.iterrows():
+        cum = 0
+        for value in row:
+            cum += data.loc[idx][value]
+            if cum <= data.loc[idx]['top_percentile']:
+                mask.loc[(mask['index'] == idx) & (mask['column']== value), 'keep'] = 1
+
+    mask = pd.pivot(mask, columns="column", index="index", values="keep")
+    return mask
+
+def mask_allbut_k_percentile_of_each_col(df, percentile):
+    '''
+    Look at the keep_k_percentile_of_each_row function for more details
+    '''
+    data = df.copy()
+    data = data.T
+    mask = mask_allbut_k_percentile_of_each_row(data, percentile)
+    return mask.T
+
+def keep_k_percentile_of_each_col_and_each_row(df, percentile):
+    final_df = df.copy()
+    mask_row = mask_allbut_k_percentile_of_each_row(final_df, percentile)
+    mask_col = mask_allbut_k_percentile_of_each_col(final_df, percentile)
+    mask_all = mask_row + mask_col
+    mask_all = mask_all > 0
+    final_df = final_df.where(mask_all, 0)
+    final_df = final_df.rename_axis(None, axis=0)
+    final_df = final_df.rename_axis(None, axis=1)
+
+    return final_df

@@ -77,7 +77,7 @@ class EmitterReceiverCoupled(nn.Module):
         self.n_nodes = n_nodes
         self.embedding_size = embedding_size
         self.n_arms = n_arms
-        self.l1_size = 10 # adding another layer to decoder if needed
+        self.l1_size = 5 # adding another layer to decoder if needed
 
         # encode, an embedding layer followed by a batch normalization
         self.embeddings = nn.ModuleList(
@@ -295,7 +295,7 @@ def total_loss(first_second_node_embeddings, n_arms, output, n_nodes, first_node
 padding = False
 
 path = "/Users/fahimehb/Documents/NPP_GNN_project/dat/"
-walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_double_stochastic_7connections.csv")
+walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/walk_extended_npp_100_100.csv")
 # walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/GNN/dat/walks/jsd/N_1_l_1000_p_1_q_1/walk_row_normal_new_npp_adj.csv")
 
 
@@ -307,7 +307,7 @@ index_2_word = get_idx2word(vocabulary, padding=padding)
 # Run the code with different values for the window, lambda and embedding size
 for w in [1]: # window size
     for e in [3]: # embedding_size
-        for l in [0.9999]: # lambda in the loss function
+        for l in [0.99]: # lambda in the loss function
             window = w
             batch_size = 2000
             embedding_size = e
@@ -413,7 +413,7 @@ for w in [1]: # window size
                                      index=index_2_word.values())
                     E.index = E.index.astype('str')
 
-                    prefix = "run8_double_stochastic"
+                    prefix = "extended_npp_run0"
                     output_filename = prefix + "_" + str(epoch) + "_R_w" + str(window) + "_" + \
                                       str(embedding_size) + "d.csv"
                     R.to_csv(path + '/' + output_filename)

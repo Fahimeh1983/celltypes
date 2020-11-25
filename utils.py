@@ -58,18 +58,20 @@ def get_all_file_names(path):
     output = os.listdir(path)
     return output
 
-def get_npp_visp_interaction_mat_path(layer):
+def get_npp_visp_interaction_mat_path(layer, version):
     roi = "VISp"
     root = get_dir_root()
     layer_filename = layer + ".csv"
-    path = concat_path(root, "NPP_GNN_project", "dat", "Interaction_mats", roi, layer_filename)
-    # print(path)
+    folder = "Interaction_mats_" + version
+    path = concat_path(root, "NPP_GNN_project", "dat", folder, roi, layer_filename)
+    # print("reading from:", path)
     return path
 
-def get_npp_visp_layers():
+def get_npp_visp_layers(version):
     roi = "VISp"
     root = get_dir_root()
-    path = concat_path(root, "NPP_GNN_project", "dat", "layers.csv")
+    filename = "layers_" + version + ".csv"
+    path = concat_path(root, "NPP_GNN_project", "dat", filename)
     layers = pd.read_csv(path)['layers'].tolist()
     return layers
 
@@ -159,9 +161,12 @@ def get_E_R_embedding_filepath(filepath, prefix_filename, embedding_size, window
 #
 #################################################
 
-def read_visp_npp_cldf():
+def read_visp_npp_cldf(version):
     root = get_dir_root()
-    path = concat_path(root, "NPP_GNN_project", "dat", "cl_df_VISp_annotation.csv")
+    if version == "old":
+        path = concat_path(root, "NPP_GNN_project", "dat", "cl_df_VISp_annotation.csv")
+    if version == "new":
+        path = concat_path(root, "NPP_GNN_project", "dat", "cl_df_VISp_annotation_updated.csv")
     cl_df = pd.read_csv(path, index_col="cluster_id")
     print("Reading cldf from:", path)
     cl_df.index = cl_df.index.astype(str)
@@ -224,6 +229,10 @@ def read_list_from_csv(path):
         reader = csv.reader(myfile)
         data = list(reader)
     return data[0]
+
+def print_whole_df(df):
+    pd.set_option("display.max_rows", None, "display.max_columns", None)
+    return df
 
 
 

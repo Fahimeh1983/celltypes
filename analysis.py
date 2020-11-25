@@ -6,54 +6,76 @@ from scipy.spatial import procrustes
 from scipy.spatial.distance import pdist
 from scipy.spatial.distance import squareform
 from sklearn.decomposition import NMF
-from sklearn.metrics import ndcg_score, dcg_score
+from sklearn.metrics import ndcg_score
 from scipy import linalg
 import scipy as sp
-from statistics import mean
+from collections import defaultdict
+from sklearn.preprocessing import StandardScaler
+from sklearn.manifold import TSNE
+import umap
 
-def summarize_walk_embedding_results(gensim_dict, index, embedding_size, cl_df=None, padding_label=None, desired_cols=None):
+
+def summarize_embedding_results(E, R, resolution=None, cldf=None):
     """
-    Takes a dictionary of gensim word2vec output and make a data frame for more analysis. This can be used
-    for only one or for multiple graphs. so if it is only one graph then the dict has only one key
-
-    Parameters
-    ----------
-    gensim_dict: keys are the name or the label of the graph and the values are the word2vec output
-    index: index of each row
-    embedding_size: embedding size
-    cl_df: it is a reference df which has the cluster_id and cluster_color, if provided, then those data
-    will be added to the output data frame
+    Args:
+    ------
+    E: df, emitter representation
+    R: df, receiver representation
+    resoltuion: "cluster_label", "subclass_label" or class_label
+    cldf: the ref metadata
 
     Returns
     -------
-    a data frame which has the embedding and some more info if cl_df is provided
+    emit: emitter data frame with metadata attached
+    rece: receiver data frame with metadata attached
+
     """
+    emit = E.copy()
+    rece = R.copy()
 
-    data = []
+    emit.index = emit.index.astype(str)
+    rece.index = rece.index.astype(str)
 
-    for k, v in gensim_dict.items():
+    emit['node_act'] = "E"
+    rece['node_act'] = "R"
+    # cols = emit.columns.tolist()
 
-        emb = pd.DataFrame(v, index=index)
-        emb.columns = ["Z" + str(i) for i in range(embedding_size)]
-        emb.index.name = "cluster_id"
+    if cldf is not None:
+        ref = cldf.copy()
+        ref = ref.reset_index()
+        if resolution is None:
+            raise ValueError("When cldf is given a resolution os required")
 
-        if cl_df is not None:
-            if padding_label:
-                emb = emb.drop(padding_label)
+        if resolution == "cluster_label":
+            resolution_id = "cluster_id"
+            resolution_color = "cluster_color"
+            emit.index.name = "cluster_id"
+            rece.index.name = "cluster_id"
 
-            cl_df.index = cl_df.index.astype(str)
-            emb.index = emb.index.astype(str)
-            emb = emb.merge(cl_df, on="cluster_id")
+        if resolution == "subclass_label":
+            resolution_id = "subclass_id"
+            resolution_color = "subclass_color"
+            emit.index.name = "subclass_id"
+            rece.index.name = "subclass_id"
 
-        if desired_cols is None:
-            print_cols = ["Z" + str(i) for i in range(embedding_size)]
-        else:
-            print_cols = ["Z" + str(i) for i in range(embedding_size)] + desired_cols
+        if resolution == "class_label":
+            resolution_id = "class_id"
+            resolution_color = "class_color"
+            emit.index.name = "class_id"
+            rece.index.name = "class_id"
 
-        data.append(emb[print_cols])
+        ref[resolution_id] = ref[resolution_id].astype(str)
+        print(ref[resolution_id])
+        # cols = cols + [resolution, resolution_color]
 
-    return data
+        # merge with ref metadata
+        emit = emit.merge(ref, on=resolution_id)
+        emit = emit.set_index(resolution_id, drop=True)
 
+        rece = rece.merge(ref, on=resolution_id)
+        rece = rece.set_index(resolution_id, drop=True)
+
+    return emit, rece
 
 
 def get_closest_nodes(emb, index, node, topn):
@@ -317,24 +339,270 @@ def get_distance_ndcg_score(node_id, E_to_R, adj, k):
     true_y = np.array([adj.loc[node_id].tolist()])
     node_imp_dict = get_distance_node_importance(node_id, E_to_R)
     predicted_y = np.array([[node_imp_dict[i] for i in adj.columns]])
-    return ndcg_score(true_y, predicted_y, k=k)
+    return true_y, predicted_y, node_imp_dict, ndcg_score(true_y, predicted_y, k=k)
 
 
-# def best_fit_slope_and_intercept(xs,ys):
-#     m = (((mean(xs)*mean(ys)) - mean(xs*ys)) /
-#          ((mean(xs)*mean(xs)) - mean(xs*xs)))
-#     b = mean(ys) - m*mean(xs)
-#     return m, b
-#
-# def squared_error(ys_orig,ys_line):
-#     return sum((ys_line - ys_orig) * (ys_line - ys_orig))
-#
-# def coefficient_of_determination(ys_orig,ys_line):
-#     y_mean_line = [mean(ys_orig) for y in ys_orig]
-#     squared_error_regr = squared_error(ys_orig, ys_line)
-#     squared_error_y_mean = squared_error(ys_orig, y_mean_line)
-#     return 1 - (squared_error_regr/squared_error_y_mean)
-#
-#
-#
-#
+def precision_recall_at_k(predictions, k=10):
+    """Return precision and recall at k metrics for each user
+
+    Args:
+        predictions: a list of dictionaries, each dict has 4 keys, uid is the source node
+        tid is the target node, true_rel is the adj matrix value or the true relevance of
+        target node and source node, est is the estimated value of the true relevance using
+        our machine learning model, which is basically similarity obtained by distance between
+        the embedding of source and target. We obtain the coordinate, then distance and then
+        for each node we subtarct the max value of each row from each value of the row. This
+        way the node which has the lowest distance will have the highest value which we call
+        it similarity. If threshold is zero, the absolute values are not important and we will
+        only use the order to compute the presicion and recall
+
+        k: is the rank k
+
+    Returns:
+       sqrt of the min of the svd in all direction of embedding space
+
+    """
+
+    #     threshold: float value for thresholding true relevance and estimated values. In our
+    #     case, since estimated values are the similarity between the nodes obtained from the
+    #     embedding and true relevance is the edge weight, we must put the threshold to zero
+    #     which means we are taking all the non zero weight edges as relevant
+
+    print("This measure makes sense for when the small weights are set to zero and everything more"
+         "than 0.00001 is a relevant weight and almost equal to all other weights")
+
+    threshold = 0.00001
+    # First map the predictions to each user.
+    user_est_true = defaultdict(list)
+    for prediction in predictions:
+        user_est_true[prediction['uid']].append((prediction['est'], prediction['true_rel'], prediction['tid']))
+
+    precisions = dict()
+    recalls = dict()
+    sorted_user_est_true = defaultdict(list)
+
+    for uid, user_ratings in user_est_true.items():
+        # Sort user ratings by estimated value
+        user_ratings.sort(key=lambda x: x[0], reverse=True)
+
+        sorted_user_est_true[uid] = user_ratings
+
+
+        # Number of relevant items
+        n_rel = sum((true_r >= threshold) for (_, true_r, _) in user_ratings)
+
+        # Number of recommended items in top k
+        n_rec_k = sum((est >= threshold) for (est, _, _) in user_ratings[:k])
+
+        # Number of relevant and recommended items in top k
+        n_rel_and_rec_k = sum(((true_r >= threshold) and (est >= threshold))
+                              for (est, true_r, _) in user_ratings[:k])
+
+        # Precision@K: Proportion of recommended items that are relevant
+        # When n_rec_k is 0, Precision is undefined. We here set it to 0.
+
+        precisions[uid] = n_rel_and_rec_k / n_rec_k if n_rec_k != 0 else 0
+
+        # Recall@K: Proportion of relevant items that are recommended
+        # When n_rel is 0, Recall is undefined. We here set it to 0.
+        # print(n_rec_k, n_rel)
+
+        recalls[uid] = n_rel_and_rec_k / n_rel if n_rel != 0 else 0
+
+    return precisions, recalls, sorted_user_est_true
+
+
+def get_similarity_from_distance_matrix(e_to_r):
+    '''
+    Get the distance matrix which each row has the distance of that node from all the other
+    nodes in the graph and compute the similarity. We define the similarity for each row as
+    each value subtracted from the max value of that row and then we take the absolute value.
+    This way the larget simialrity is the smallest distance
+
+
+    Parameters
+    ----------
+    node_id: str
+    E_to_R : emitter to receiver distance matrix
+
+    Returns
+    -------
+    similarity
+    '''
+
+    df = e_to_r.copy()
+    df['row_max'] = np.max(df, axis=1)
+    similarity = df.sub(df['row_max'], axis="index").abs()
+    similarity = similarity.drop("row_max", axis=1)
+    return  similarity
+
+
+def get_predictions_correct_format_for_precision_recall_function(estimated_relevance, true_relevance):
+    '''
+    gets two data frames of estimated relevance and the true relevance and returns
+    a list of all predictions in correct format to feed to precisions recall function
+
+
+    Parameters
+    ----------
+    estimated_relevance: a data frame which is estimated relevance or similairty between each two nodes.
+    in our case we are not going to use the exact values, instead we just sort them based on the values
+    as in precision recall calculations we have a threshold of zero
+    true_relevance : a data frame which is true relevance between each two nodes. In our case we are using
+    the adj values or edge weights but again we not using the absolute values but instead as the threshold
+    in precision recall is zero, we are going to just care if it is zero or non-zero
+
+    Returns
+    -------
+
+    '''
+    nodes = estimated_relevance.index.tolist()
+    predictions = []
+    for s in nodes:
+        for t in nodes:
+            predictions.append({"uid": s,
+                                "tid": t,
+                                "true_rel": true_relevance.loc[s][t],
+                                "est": estimated_relevance.loc[s][t]})
+
+    return predictions
+
+
+def Compute_node_average_ndcg(adj, e_to_r, k):
+    '''
+    Takes the true relevance matrix which can be adj matrix and the distance matrix
+    between emitter and receiver represenation and compute the ndcg per node and then
+    return the average
+
+    Args:
+    -----
+    adj: True relevane or the adj matrix
+    e_to_r: each row is the distance between each E node(index) and all the other R nodes(columns)
+    k: Rank for computing ncdg
+    '''
+
+    nandcg = {}
+    for n in e_to_r.index.tolist():
+        _, _, _, nandcg[n] = get_distance_ndcg_score(n, e_to_r, adj, k=k)
+
+    return np.mean([v for v in nandcg.values()])
+
+
+def get_closest_nodes_info(E_to_R_dist, adjacency, topn, node_id=None, node_label=None, cldf=None, resolution=None, node_action="E"):
+    '''
+    Takes the E_to_R_dist matrix and the adj,
+    '''
+
+    if node_label is not None:
+        if node_id is not None:
+            utils.raise_error("node id and node label can not both Not none")
+        else:
+            node_id = cldf[cldf['cluster_label'] == node_label].index[0]
+
+    dist = E_to_R_dist.copy()
+    adj = adjacency.copy()
+
+    if node_action == "R":
+        dist = dist.T
+        adj = adj.T
+
+    ref = cldf.copy()
+    ref = ref.reset_index()
+    ref['cluster_id'] = ref['cluster_id'].apply(str)
+    ref['subclass_id'] = ref['subclass_id'].apply(str)
+    ref['class_id'] = ref['class_id'].apply(str)
+
+    df = pd.DataFrame()
+    true_y, predicted_y, node_imp_dict, _ = get_distance_ndcg_score(node_id, dist, adj, topn)
+    X = true_y[0]  # taken from the adj
+    Y = predicted_y[0]  # computed distances and then scored, the smallet distance has the highest score
+
+    # first sort the predicted_y from largest to smallest and then order the true_y based on the predicted_y
+    Z = [x for _, x in sorted(zip(Y, X),reverse=True)]
+    sorted_neighbors_scores = sorted(Y, reverse=True)[0:topn]
+    print()
+
+    df['predicted_neighbors_weights'] = Z[0:topn]
+
+    if resolution is not None:
+        if resolution == "cluster_label":
+            resolution_id = "cluster_id"
+        if resolution == "subclass_label":
+            resolution_id = "subclass_id"
+        if resolution == "class_label":
+            resolution_id = "class_id"
+
+    print("Closet neighbors of", resolution, ref[ref[resolution_id] == node_id][resolution].tolist()[0])
+    print("______________________________________")
+
+
+    index_list = []
+    for s in sorted_neighbors_scores:
+        index_list.append([k for (k, v) in node_imp_dict.items() if v == s][0])
+    df['predicted_closest_neighbors_index'] = index_list
+
+    if ref is not None:
+        if resolution is None:
+            utils.raise_error(
+                "Resolution must be provided, cluster_label, subclass_label or class_label"
+            )
+        my_list = []
+        for idx in df['predicted_closest_neighbors_index']:
+            label = ref[ref[resolution_id] == idx][resolution].tolist()
+            if resolution_id == "cluster_label":
+                if len(label) > 1:
+                    utils.raise_error(
+                        "more than one cluster_label are presenet"
+                    )
+            my_list.append(label[0])
+        df['predicted_closest_neighbors_label'] = my_list
+
+    df['Actual_neighbor_weights'] = sorted(X, reverse=True)[0:topn]
+
+    index_list = []
+    for value in df['Actual_neighbor_weights']:
+        index_list.append(adj.loc[node_id][adj.loc[node_id] == value].index.tolist()[0])
+    df['Actual_neighbor_index'] = index_list
+
+
+    if ref is not None:
+        if resolution is None:
+            utils.raise_error(
+                "Resolution must be provided, cluster_label, subclass_label or class_label"
+            )
+        my_list = []
+        for idx in df['Actual_neighbor_index']:
+            label = ref[ref[resolution_id] == idx][resolution].tolist()
+            if resolution_id == "cluster_label":
+                if len(label) > 1:
+                    utils.raise_error(
+                        "more than one cluster_label are presenet"
+                    )
+            my_list.append(label[0])
+        df['Actual_neighbor_label'] = my_list
+
+    match = [1 if i in df['predicted_closest_neighbors_index'].tolist() else 0 for i in
+             df['Actual_neighbor_index'].tolist()]
+    df['match'] = match
+
+    return df
+
+
+def Compute_umap(emb, emb_size):
+    '''
+    Takes the emb and compute the umap
+    '''
+    df = emb.copy().reset_index()
+    df_for_umap = df[["Z" + str(i) for i in range(emb_size)]]
+    Scaled_emb = StandardScaler().fit_transform(df_for_umap)
+    reducer = umap.UMAP(random_state=40)
+    emb_umap = reducer.fit_transform(Scaled_emb)
+    emb_umap = pd.DataFrame(emb_umap, columns=["Z0", "Z1"])
+
+    meta_data = df[[c for c in df.columns if c not in ["Z" + str(i) for i in range(emb_size)]]]
+
+    return emb_umap.join(meta_data)
+
+
+
+

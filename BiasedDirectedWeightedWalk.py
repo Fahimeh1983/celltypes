@@ -404,7 +404,10 @@ class BiasedDirectedRandomWalk(BeginWalk):
 
                 if out_neighbours:
 
-                    current_node = rs.choice(out_neighbours)
+                    neighbors_weight_list = [self.graph._edge_weights(previous_node, out_n)[0] for out_n in out_neighbours]
+                    # print(out_neighbours, neighbors_weight_list)
+                    current_node = np.random.choice(out_neighbours, 1, p=neighbors_weight_list)[0]
+                    # current_node = rs.choice(out_neighbours)
                     for _ in range(length - 1):
                         walk.append(current_node)
                         out_neighbours = self.out_nodes(current_node)
@@ -522,3 +525,36 @@ def biased_directed_multi_walk(stellar_multi_graph_dict, nodes, layer_importance
 
     return walks, layers
 
+
+# from cell import utils, graph_utils
+# import pandas as pd
+#
+#
+# npp_adj = np.zeros((93,93))
+# layers = utils.get_npp_visp_layers()
+#
+# for layer in layers:
+#     path = utils.get_npp_visp_interaction_mat_path(layer)
+#     tmp_inter= pd.read_csv(path, index_col="Unnamed: 0")
+#     npp_adj = npp_adj + tmp_inter.values
+#
+# npp_adj = pd.DataFrame(npp_adj)
+# npp_adj.index = npp_adj.index.astype(str)
+# npp_adj.columns = npp_adj.columns.astype(str)
+#
+# npp_adj = npp_adj.drop('21', axis=0)
+# npp_adj = npp_adj.drop('21', axis=1)
+# npp_adj = npp_adj.drop('32', axis=0)
+# npp_adj = npp_adj.drop('32', axis=1)
+#
+# edges = graph_utils.build_edge_list(weight_matrix=npp_adj, threshold=None, directed=True)
+#
+# nxg = graph_utils.build_nx_graph(source_target_weight=edges, directed=True)
+#
+# # 2) Create stellar Di graphs
+# sdg = StellarDiGraph(nxg)
+# BeginWalk(sdg, begin_checks=True, weighted=True, directed=True)
+# rw = BiasedDirectedRandomWalk(sdg, directed=True, weighted=True, begin_checks=False)
+#
+# nodes = list(sdg.nodes())
+# walks = rw.run(nodes=nodes, length=100, n=100, p=1, q=1, weighted=True, directed=True)

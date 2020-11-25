@@ -100,9 +100,8 @@ class EmitterReceiverCoupled(nn.Module):
         '''
         batch_size = first_node.shape[0]
         x = self.embeddings[arm]
-        y = self.batchnorm1d[arm]
-        first = y(x(first_node.reshape(batch_size)))
-        second = y(x(second_node.reshape(batch_size)))
+        first = x(first_node.reshape(batch_size))
+        second = x(second_node.reshape(batch_size))
         first_second_embeddings = torch.stack((first, second), dim=1)
         first_second_embeddings = first_second_embeddings.reshape(batch_size, 2, self.embedding_size)
         return first_second_embeddings
@@ -194,21 +193,21 @@ def min_var_loss(first_second_node_embeddings, batch_size, embedding_size, n_arm
     Returns:
     '''
 
-    zj = torch.stack((first_second_node_embeddings[0],
-                      first_second_node_embeddings[1]),
-                     dim=0).reshape(2 * batch_size, 2, embedding_size)
-
-    u, vars_j_, v = torch.svd(zj, compute_uv=True)
-    m_v_loss = torch.sqrt(torch.min(vars_j_))
-    return m_v_loss
-
-    # m_v_loss = [None] * n_arms
-    # for arm in range(n_arms):
-    #     zj = first_second_node_embeddings[arm].reshape(2 * batch_size, embedding_size)
-    #     u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
-    #     m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
+    # zj = torch.stack((first_second_node_embeddings[0],
+    #                   first_second_node_embeddings[1]),
+    #                  dim=0).reshape(2 * batch_size, 2, embedding_size)
     #
-    # return min(m_v_loss)
+    # u, vars_j_, v = torch.svd(zj, compute_uv=True)
+    # m_v_loss = torch.sqrt(torch.min(vars_j_))
+    # return m_v_loss
+
+    m_v_loss = [None] * n_arms
+    for arm in range(n_arms):
+        zj = first_second_node_embeddings[arm].reshape(2 * batch_size, embedding_size)
+        u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
+        m_v_loss[arm] = torch.sqrt(torch.min(vars_j_))
+
+    return min(m_v_loss)
 
 
 def total_loss(first_second_node_embeddings, batch_size, embedding_size, n_arms, output, n_nodes, first_node, lamda):
@@ -262,9 +261,9 @@ for w in [1]:
             # receiver_tuples, emitter_tuples = prepare_vocab.emitter_receiver_tuples(corpus, window=window)
             receiver_tuples, emitter_tuples = emitter_receiver_tuples(walks, window=window)
 
-            temp = list(zip(emitter_tuples, receiver_tuples))
-            random.shuffle(temp)
-            emitter_tuples, receiver_tuples = zip(*temp)
+            # temp = list(zip(emitter_tuples, receiver_tuples))
+            # random.shuffle(temp)
+            # emitter_tuples, receiver_tuples = zip(*temp)
 
             if padding:
                 n_nodes = len(vocabulary) + 1
@@ -324,12 +323,12 @@ for w in [1]:
             E = pd.DataFrame(E, columns=["Z"+str(i) for i in range(embedding_size)], index=index_2_word.values())
             E.index = E.index.astype('str')
 
-            output_filename = "test1_hope_11nodes_lambda"+ str(l) + "_R_w" + str(window) \
+            output_filename = "soccer_nozeromean_lambda"+ str(l) + "_R_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + str(
                 embedding_size) + "d.csv"
             R.to_csv(path + '/' + output_filename)
 
-            output_filename = "test1_hope_11nodes_lambda"+ str(l) + "_E_w" + str(window) \
+            output_filename = "soccer_nozeromean_lambda"+ str(l) + "_E_w" + str(window) \
                               + "_ep" + str(n_epochs) + "_" + \
                               str(embedding_size) + "d.csv"
             E.to_csv(path + "/" + output_filename)
