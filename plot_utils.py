@@ -145,12 +145,45 @@ def Facet_Grid_Heatmap(data, groupby_col, col_wrap, height, index, column, value
     a heatmap grid
     """
 
-    fg = sns.FacetGrid(data, col=groupby_col, col_wrap = col_wrap, height= height)
-    fg.map_dataframe(draw_heatmap, index, column, value, cbar=False, square = True)
+    fg = sns.FacetGrid(data, col=groupby_col, col_wrap=col_wrap, height=height)
+    fg.map_dataframe(draw_heatmap, column, index, value, cbar=False, square=True)
 
     for ax in fg.axes.flat:
-        ax.set_aspect('equal','box')
+        ax.set_aspect('equal', 'box')
     plt.show()
+
+
+def Grid_Heatmap(my_dict):
+    """
+    Takes a dictionary of data frames and plot their heatmap in a grid,
+    For each data fram group it based on a column and plot a heatmap
+
+    Parameters
+    ----------
+    data: a dictionary of data frames
+    index: this is going to be the x axis on the heatmap
+    column: this is going to be the y axis on the heatmap
+    value: this is the weight or color of heatmap
+    groupby_col: is the groupby column
+    col_wrap: number of heat map in each row when plotting
+    height: height of each heatmap
+
+    return
+    --------------------
+    a heatmap grid
+    """
+    df = my_dict.copy()
+    data = pd.DataFrame()
+
+    for k, v in df.items():
+        v = v.stack().reset_index()
+        v["channel_id"] = k
+        v.columns = ["index", "column", "value", "channel_id"]
+        data = data.append(pd.DataFrame(v), ignore_index=True)
+
+    Facet_Grid_Heatmap(data, "channel_id", len(data.keys()), 5, "index", "column", "value")
+    return data
+
 
 def plot_loss(loss_filepath):
     """

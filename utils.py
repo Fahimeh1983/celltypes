@@ -152,7 +152,41 @@ def get_E_R_embedding_filepath(filepath, prefix_filename, embedding_size, window
     print(R_path)
     return E_path, R_path
 
+def read_npp_interaction_matrices(version, which_layers=None):
+    '''
+    Read the interaction matrices of npp and return the combined adj matrix
+    if which_layer is none then it read all the layers and combine them
 
+    Args:
+    ----
+    which_layers: a list of layer names that we want to read and combine
+    '''
+
+    npp_adj = np.zeros((93, 93))
+    if which_layers is None:
+        which_layers = get_npp_visp_layers(version)
+
+    for layer in which_layers:
+        path = get_npp_visp_interaction_mat_path(version=version, layer=layer)
+        tmp_inter = pd.read_csv(path, index_col="Unnamed: 0")
+        npp_adj = npp_adj + tmp_inter.values
+
+    return npp_adj
+
+def read_npp_interaction_df(version, which_layers, index=None, columns=None):
+    '''
+    Read the interaction matrices of npp and return the combined adj matrix
+    if which_layer is none then it read all the layers and combine them
+
+    Args:
+    ----
+    which_layers: a list of layer names that we want to read and combine
+    '''
+
+    df = read_npp_interaction_matrices(version, which_layers)
+    df = pd.DataFrame(df, index=index, columns=columns)
+
+    return df
 
 
 #################################################

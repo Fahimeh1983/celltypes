@@ -65,7 +65,6 @@ def summarize_embedding_results(E, R, resolution=None, cldf=None):
             rece.index.name = "class_id"
 
         ref[resolution_id] = ref[resolution_id].astype(str)
-        print(ref[resolution_id])
         # cols = cols + [resolution, resolution_color]
 
         # merge with ref metadata

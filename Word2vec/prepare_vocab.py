@@ -1,4 +1,5 @@
 import itertools
+import numpy as np
 
 def get_vocabulary(corpus):
     '''
@@ -148,3 +149,22 @@ def emitter_receiver_tuples(corpus, window):
                 for j in range(last_context_word_index-1, i, -1):
                     receiver_tuple_list.append((word, text[j]))
     return emitter_tuple_list, receiver_tuple_list
+
+
+def emitter_receiver_edgetype_triples(corpus, window, source_target_edgetypeprop_dict, n_edge_type):
+    emitter_triple_list = []
+    receiver_triple_list = []
+    for text in corpus:
+        for i, word in enumerate(text):
+            first_context_word_index = max(0, i - window)
+            last_context_word_index = min(i + window + 1 , len(text))
+            if (i >= window) & (i<len(text)- window):
+                for j in range(first_context_word_index, i):
+                    edge_prop = source_target_edgetypeprop_dict[(text[j], word)]
+                    edge_type = np.random.choice(n_edge_type, 1, p=edge_prop)[0]
+                    emitter_triple_list.append((word, text[j], edge_type))
+                for j in range(last_context_word_index-1, i, -1):
+                    edge_prop = source_target_edgetypeprop_dict[(word, text[j])]
+                    edge_type = np.random.choice(n_edge_type, 1, p=edge_prop)[0]
+                    receiver_triple_list.append((word, text[j], edge_type))
+    return emitter_triple_list, receiver_triple_list

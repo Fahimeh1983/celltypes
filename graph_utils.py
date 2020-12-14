@@ -469,41 +469,7 @@ def return_a_toy_graph_weight_mat(n_nodes, min_connection, max_connection):
     return total_inter
 
 
-def read_npp_interaction_matrices(version, which_layers=None):
-    '''
-    Read the interaction matrices of npp and return the combined adj matrix
-    if which_layer is none then it read all the layers and combine them
 
-    Args:
-    ----
-    which_layers: a list of layer names that we want to read and combine
-    '''
-
-    npp_adj = np.zeros((93, 93))
-    if which_layers is None:
-        which_layers = utils.get_npp_visp_layers(version)
-
-    for layer in which_layers:
-        path = utils.get_npp_visp_interaction_mat_path(version=version, layer=layer)
-        tmp_inter = pd.read_csv(path, index_col="Unnamed: 0")
-        npp_adj = npp_adj + tmp_inter.values
-
-    return npp_adj
-
-def read_npp_interaction_df(version, which_layers, index, columns):
-    '''
-    Read the interaction matrices of npp and return the combined adj matrix
-    if which_layer is none then it read all the layers and combine them
-
-    Args:
-    ----
-    which_layers: a list of layer names that we want to read and combine
-    '''
-
-    df = read_npp_interaction_matrices(version, which_layers)
-    df = pd.DataFrame(df, index=index, columns=columns)
-
-    return df
 
 
 def Keep_only_k_largest_value_of_each_row(mat, k):
@@ -610,11 +576,16 @@ def mask_allbut_k_percentile_of_each_row(df, percentile):
     that should be kept for that row of df
     '''
     data = df.copy()
+    data.index = data.index.astype(str)
+    data.columns = data.columns.astype(str)
 
-    sorted_column_data = get_column_index_of_sorted_rows(df)
+    sorted_column_data = get_column_index_of_sorted_rows(data)
+    sorted_column_data.index = sorted_column_data.index.astype(str)
+    sorted_column_data.columns = sorted_column_data.columns.astype(str)
 
     data['sum'] = data.sum(axis=1)
     data['top_percentile'] = data['sum'] * percentile
+
 
     mask = sorted_column_data.stack().reset_index()
     mask = mask.rename(columns={"level_0": "index", "level_1": "keep", 0: "column"}, errors="raise")
@@ -627,7 +598,7 @@ def mask_allbut_k_percentile_of_each_row(df, percentile):
         for value in row:
             cum += data.loc[idx][value]
             if cum <= data.loc[idx]['top_percentile']:
-                mask.loc[(mask['index'] == idx) & (mask['column']== value), 'keep'] = 1
+                mask.loc[(mask['index'] == str(idx)) & (mask['column']== str(value)), 'keep'] = 1
 
     mask = pd.pivot(mask, columns="column", index="index", values="keep")
     return mask
@@ -643,11 +614,23 @@ def mask_allbut_k_percentile_of_each_col(df, percentile):
 
 def keep_k_percentile_of_each_col_and_each_row(df, percentile):
     final_df = df.copy()
+    final_df.index = final_df.index.astype(str)
+    final_df.columns = final_df.columns.astype(str)
     mask_row = mask_allbut_k_percentile_of_each_row(final_df, percentile)
     mask_col = mask_allbut_k_percentile_of_each_col(final_df, percentile)
     mask_all = mask_row + mask_col
     mask_all = mask_all > 0
     final_df = final_df.where(mask_all, 0)
+    final_df = final_df.rename_axis(None, axis=0)
+    final_df = final_df.rename_axis(None, axis=1)
+
+    return final_df
+
+def keep_k_percentile_of_each_row(df, percentile):
+    final_df = df.copy()
+    mask_row = mask_allbut_k_percentile_of_each_row(final_df, percentile)
+    mask_row = mask_row > 0
+    final_df = final_df.where(mask_row, 0)
     final_df = final_df.rename_axis(None, axis=0)
     final_df = final_df.rename_axis(None, axis=1)
 

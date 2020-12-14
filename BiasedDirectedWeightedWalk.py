@@ -373,6 +373,7 @@ class BiasedDirectedRandomWalk(BeginWalk):
 
         walks = []
         for node in nodes:  # iterate over root nodes
+            print(node)
             for walk_number in range(n):  # generate n walks per root node
                 # the walk starts at the root
                 walk = [node]

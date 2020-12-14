@@ -33,6 +33,22 @@ class EmitterReceiverDataset_debug(Dataset):
         return self.n_samples
 
 
+class SignedEmitterReceiverDataset(Dataset):
+    def __init__(self, triples_list, wd_2_idx):
+        self.context = torch.from_numpy(np.array([wd_2_idx[i[0]] for i in triples_list]))
+        self.target = torch.from_numpy(np.array([wd_2_idx[i[1]] for i in triples_list]))
+        self.edgetype = torch.from_numpy(np.array([i[2] for i in triples_list]))
+
+        self.n_samples = len(triples_list)
+
+    def __getitem__(self, index):
+        sample = (self.context[index], self.target[index], self.edgetype[index])
+        return sample
+
+    def __len__(self):
+        return self.n_samples
+
+
 class EmitterReceiverNegativeDataset_debug(Dataset):
     def __init__(self, tuples_list, wd_2_idx, n_pos, n_neg):
         self.word = torch.from_numpy(np.array([wd_2_idx[i[0]] for i in tuples_list]))
