@@ -392,7 +392,7 @@ for w in [1]: # window size
             window = w
             batch_size = 2000
             embedding_size = e
-            learning_rate = 0.00001
+            learning_rate = 0.0001
             n_epochs = 3000
             n_arms = 2
             lamda = l
@@ -476,7 +476,8 @@ for w in [1]: # window size
                 print(f'epoch: {epoch + 1}/{n_epochs},'
                       f'loss:{np.mean(losses):.4f},'
                       f'WV:{wv_l:.4f}',
-                      f'sign:{sign_l:.4f}')
+                      f'sign:{sign_l:.4f}',
+                      f'dist:{d_loss:.4f}')
 
                 if ((epoch % 100 == 0)):
                     R = all_node_emb[0].cpu().detach().numpy()
