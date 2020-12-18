@@ -101,6 +101,7 @@ class EmitterReceiverCoupled(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self.relu = nn.ReLU()
         self.tanh = nn.Tanh() # if needed for encoder non-linearity
+        self.softmax = nn.Softmax()
 
     def encoder(self, first_node, second_node, index_2_word_tensor, arm):
         '''
@@ -172,7 +173,8 @@ class EmitterReceiverCoupled(nn.Module):
         out = self.decode1_l1[arm](first_embedding)
         # out = self.tanh(out)
         # out = self.decode_l2[arm](out)
-        out = self.sigmoid(out)
+        # out = self.sigmoid(out)
+        out = self.softmax(out)
         return out
 
 
@@ -190,9 +192,15 @@ class EmitterReceiverCoupled(nn.Module):
         '''
 
         #TODO
-        long_first_second_embedding = first_second_embeddings.reshape(batch_size, 2 * embedding_size)
+        other_arm = abs(arm - 1)
+        first_node_embeddings_from_other_arm = torch.unbind(first_second_embeddings[other_arm], dim=1)[0]
+        second_node_embeddings_from_current_arm = torch.unbind(first_second_embeddings[arm], dim=1)[1]
+        long_first_second_embedding = torch.stack((first_node_embeddings_from_other_arm,
+                                                   second_node_embeddings_from_current_arm), dim=1)
+        long_first_second_embedding = long_first_second_embedding.reshape(batch_size, 2 * embedding_size)
         out = self.decode2_l1[arm](long_first_second_embedding)
-        out = self.sigmoid(out)
+        # out = self.sigmoid(out)
+        out = self.softmax(out)
         return out
 
     def forward(self, first_node, second_node, index_2_word_tensor):
@@ -210,8 +218,10 @@ class EmitterReceiverCoupled(nn.Module):
             all_emb, first_second_embeddings = self.encoder(first_node[arm], second_node[arm], index_2_word_tensor, arm)
             first_second_node_embeddings[arm] = first_second_embeddings
             output1[arm] = self.decoder1(first_second_node_embeddings[arm], arm)
-            output2[arm] = self.decoder2(first_second_node_embeddings[arm], arm)
             all_node_emb[arm] = all_emb
+
+        for arm in range(self.n_arms):
+            output2[arm] = self.decoder2(first_second_node_embeddings, arm)
 
         first_second_node_embeddings[1] = torch.flip(first_second_node_embeddings[1], [1])
 
@@ -232,14 +242,17 @@ def loss_WV(output1, n_arms, n_nodes, first_node):
     Returns:
     '''
 
-    bce_loss = [None] * n_arms
+    # bce_loss = [None] * n_arms
+    ce_loss = [None] * n_arms
     for arm in range(n_arms):
         # here we convert the index of j to its one-hot representation
-        target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes).to(device)).float()
-        loss = nn.BCELoss()
-        bce_loss[arm] = loss(output1[arm], target)
+        #target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes).to(device)).float()
+        #loss = nn.BCELoss()
+        #bce_loss[arm] = loss(output1[arm], target)
+        loss = nn.CrossEntropyLoss()
+        ce_loss[arm] = loss(output1[arm], first_node[arm].view(-1))
 
-    return sum(bce_loss)
+    return sum(ce_loss)
 
 
 def loss_sign(output2, n_arms, n_sign, edge_type):
@@ -255,20 +268,66 @@ def loss_sign(output2, n_arms, n_sign, edge_type):
     Returns:
     '''
 
-    bce_loss = [None] * n_arms
+    #bce_loss = [None] * n_arms
+    ce_loss = [None] * n_arms
+
     for arm in range(n_arms):
         # here we convert the index of j to its one-hot representation
-        target = (edge_type[arm] == torch.arange(n_sign).reshape(1, n_sign).to(device)).float()
-        loss = nn.BCELoss()
-        bce_loss[arm] = loss(output2[arm], target)
+        #target = (edge_type[arm] == torch.arange(n_sign).reshape(1, n_sign).to(device)).float()
+        #loss = nn.BCELoss()
+        #bce_loss[arm] = loss(output2[arm], target)
+        loss = nn.CrossEntropyLoss()
+        ce_loss[arm] = loss(output2[arm], edge_type[arm].view(-1))
 
-    return sum(bce_loss)
+    return sum(ce_loss)
 
 
+def loss_emitter_receiver_independent(first_second_node_embeddings):
+    '''
+    gets the first and second node embeddings that were obtained from encoder (without passing them to decoder) and
+    compute the distance between the first node of one arm and second node of the other arm. In the example above we
+    need the distance between j of the second arm and i of the first arm and the distance between j of the first arm and
+    k of second arm. These distances should be minimized in the loss function then
+
+    Args:
+        first_second_node_embeddings: embedding of the first and second nodes that are obtained directly from embedding
+        layers for each arm. These coordinates are not passed through decoder and are obtained from encoder
+
+    Returns:
+        loss: distance loss which is the mean of the squared distance between all the first and second nodes in the batch
+    '''
+
+    dist_squared = torch.norm(first_second_node_embeddings[0] - first_second_node_embeddings[1], dim=2) ** 2
+    loss = torch.mean(dist_squared)
+    # loss = torch.mean(torch.unique(dist_squared.reshape(4000)))
+
+    return loss
 
 
+def min_var_loss(first_second_node_embeddings):
+    '''
+    Compute the variation of embeddings in all direction and take the min
 
-def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2):
+    Args:
+        first_second_node_embeddings: embedding of the first and second node from both arms taken from encoder
+        embedding_size: embedding dimension
+
+    Returns:
+       sqrt of the min of the svd in all direction of embedding space
+    '''
+
+    batch_size = first_second_node_embeddings[0].shape[0]
+    embedding_size = first_second_node_embeddings[0].shape[2]
+
+    zj = torch.stack((first_second_node_embeddings[0],
+                      first_second_node_embeddings[1]),
+                     dim=0).reshape(4 * batch_size, embedding_size)
+
+    u, vars_j_, v = torch.svd(zj - torch.mean(zj, dim=0), compute_uv=True)
+    m_v_loss = torch.sqrt(torch.min(vars_j_))
+    return torch.sqrt(vars_j_), m_v_loss
+
+def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2, first_second_node_embeddings):
     '''
     Adding AE loss and the distance loss
     Args:
@@ -283,8 +342,18 @@ def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2)
     Returns:
     '''
     WV_loss = loss_WV(output1, n_arms, n_nodes, first_node)
+
     sign_loss = loss_sign(output2, n_arms, n_sign, edge_type)
-    return  WV_loss, sign_loss, WV_loss + sign_loss
+
+    bothmvl, mvl = min_var_loss(first_second_node_embeddings)
+
+    if torch.isnan(mvl):
+        mvl = 0.001
+
+    distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings)
+
+    # return  WV_loss, sign_loss, distance_loss, lamda * (distance_loss / mvl) + (1 - lamda) * (WV_loss + sign_loss)
+    return  WV_loss, sign_loss, distance_loss,  (distance_loss / mvl) + (WV_loss + sign_loss)
 
 
 ##############################################
@@ -369,6 +438,7 @@ for w in [1]: # window size
             training_loss = []
             wv_loss = []
             sign_loss = []
+            dist_loss = []
 
             # training
             for epoch in range(n_epochs):
@@ -390,7 +460,8 @@ for w in [1]: # window size
                         first_node, second_node, torch.tensor([i for i in index_2_word.keys()]).to(device)
                     )
 
-                    wv_l, sign_l, loss = total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2)
+                    wv_l, sign_l, d_loss, loss = total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1,
+                                                            output2, first_second_node_embeddings)
 
                     loss.backward()
                     optimizer.step()
@@ -399,6 +470,7 @@ for w in [1]: # window size
                 training_loss.append(np.mean(losses))
                 wv_loss.append(wv_l.item())
                 sign_loss.append(sign_l.item())
+                dist_loss.append(d_loss.item())
 
                 #Saving the outputs every 100 epochs
                 print(f'epoch: {epoch + 1}/{n_epochs},'
@@ -435,7 +507,11 @@ for w in [1]: # window size
                     output_filename = prefix + "_sign_loss.csv"
                     utils.write_list_to_csv(path + '/' + output_filename, sign_loss)
 
+                    output_filename = prefix + "_dist_loss.csv"
+                    utils.write_list_to_csv(path + '/' + output_filename, dist_loss)
+
                     print("finished w:", w, "embedding size:", e)
+                    # torch.save(model, path+ "model_" + prefix + ".pt")
 
             # Saving final output
             all_node_emb, first_second_node_embeddings, output = model(first_node, second_node, torch.tensor(
@@ -465,5 +541,8 @@ for w in [1]: # window size
 
             output_filename = prefix + "sign.csv"
             utils.write_list_to_csv(path + '/' + output_filename, sign_loss)
+
+            output_filename = prefix + "_dist_loss.csv"
+            utils.write_list_to_csv(path + '/' + output_filename, dist_loss)
 
             print("finished w:", w, "embedding size:", e)
