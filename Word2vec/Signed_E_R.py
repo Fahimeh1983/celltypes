@@ -1,18 +1,8 @@
 import warnings; warnings.simplefilter('ignore')
 
-import torch
-import os
 import time
-import itertools
-import random
-import torch.nn as nn
-import pandas as pd
-import numpy as np
-from torch.nn import functional as F
-import matplotlib.pylab as plt
 from cell.graph_utils import *
 from cell.utils import *
-from cell.analysis import *
 from cell.plot_utils import *
 from cell.Word2vec.wv import *
 from cell.Word2vec.dataloader import *
@@ -156,9 +146,10 @@ class EmitterReceiverCoupled(nn.Module):
 
     def decoder1(self, first_second_embeddings, arm):
         '''
-        Takes the embedding of the first and second node, and pass only the first node embedding from a linear then a
-        relu and then another linear and finally sigmoid. In the example above, j is the node in both arms that we take
-        and pass through the decoder
+        Takes the embedding of the first and second node, and pass only the second node embedding from a linear then a
+        non-linear layer. In the example above, i and k are the nodes in both arms that we take and pass through the
+        decoder. Basically we want to input the i and in the output predict j for one arm and input the k and in the
+        output predict the j for the other arm
 
         Args:
             first_second_embeddings: embedding of the first and second node obtained from encoder
@@ -169,19 +160,19 @@ class EmitterReceiverCoupled(nn.Module):
         '''
 
         #TODO
-        first_embedding = torch.unbind(first_second_embeddings, dim=1)[1] #Changed it to make it like word2vec
-        out = self.decode1_l1[arm](first_embedding)
+        second_embedding = torch.unbind(first_second_embeddings, dim=1)[1] #Changed it to make it like word2vec
+        out = self.decode1_l1[arm](second_embedding)
         # out = self.tanh(out)
         # out = self.decode_l2[arm](out)
-        # out = self.sigmoid(out)
-        out = self.softmax(out)
+        out = self.sigmoid(out)
+        #out = self.softmax(out)
         return out
 
 
     def decoder2(self, first_second_embeddings, arm):
         '''
         get the first and second embedding coordinates and predict the sign. For this I concatenate the embedding of
-        the first and second nodes and feed it to the decoder
+        the first node of one arm and second node of the other arm and feed it to the decoder
 
         Args:
             first_second_embeddings: embedding of the first and second node obtained from encoder
@@ -199,8 +190,8 @@ class EmitterReceiverCoupled(nn.Module):
                                                    second_node_embeddings_from_current_arm), dim=1)
         long_first_second_embedding = long_first_second_embedding.reshape(batch_size, 2 * embedding_size)
         out = self.decode2_l1[arm](long_first_second_embedding)
-        # out = self.sigmoid(out)
-        out = self.softmax(out)
+        out = self.sigmoid(out)
+        #out = self.softmax(out)
         return out
 
     def forward(self, first_node, second_node, index_2_word_tensor):
@@ -242,17 +233,17 @@ def loss_WV(output1, n_arms, n_nodes, first_node):
     Returns:
     '''
 
-    # bce_loss = [None] * n_arms
-    ce_loss = [None] * n_arms
+    bce_loss = [None] * n_arms
+    #ce_loss = [None] * n_arms
     for arm in range(n_arms):
         # here we convert the index of j to its one-hot representation
-        #target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes).to(device)).float()
-        #loss = nn.BCELoss()
-        #bce_loss[arm] = loss(output1[arm], target)
-        loss = nn.CrossEntropyLoss()
-        ce_loss[arm] = loss(output1[arm], first_node[arm].view(-1))
+        target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes).to(device)).float()
+        loss = nn.BCELoss()
+        bce_loss[arm] = loss(output1[arm], target)
+        #loss = nn.CrossEntropyLoss()
+        #ce_loss[arm] = loss(output1[arm], first_node[arm].view(-1))
 
-    return sum(ce_loss)
+    return sum(bce_loss)/len(bce_loss)
 
 
 def loss_sign(output2, n_arms, n_sign, edge_type):
@@ -268,18 +259,18 @@ def loss_sign(output2, n_arms, n_sign, edge_type):
     Returns:
     '''
 
-    #bce_loss = [None] * n_arms
-    ce_loss = [None] * n_arms
+    bce_loss = [None] * n_arms
+    #ce_loss = [None] * n_arms
 
     for arm in range(n_arms):
         # here we convert the index of j to its one-hot representation
-        #target = (edge_type[arm] == torch.arange(n_sign).reshape(1, n_sign).to(device)).float()
-        #loss = nn.BCELoss()
-        #bce_loss[arm] = loss(output2[arm], target)
-        loss = nn.CrossEntropyLoss()
-        ce_loss[arm] = loss(output2[arm], edge_type[arm].view(-1))
+        target = (edge_type[arm] == torch.arange(n_sign).reshape(1, n_sign).to(device)).float()
+        loss = nn.BCELoss()
+        bce_loss[arm] = loss(output2[arm], target)
+        #loss = nn.CrossEntropyLoss()
+        #ce_loss[arm] = loss(output2[arm], edge_type[arm].view(-1))
 
-    return sum(ce_loss)
+    return sum(bce_loss)/len(bce_loss)
 
 
 def loss_emitter_receiver_independent(first_second_node_embeddings):
@@ -300,7 +291,6 @@ def loss_emitter_receiver_independent(first_second_node_embeddings):
     dist_squared = torch.norm(first_second_node_embeddings[0] - first_second_node_embeddings[1], dim=2) ** 2
     loss = torch.mean(dist_squared)
     # loss = torch.mean(torch.unique(dist_squared.reshape(4000)))
-
     return loss
 
 
@@ -352,7 +342,6 @@ def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2,
 
     distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings)
 
-    # return  WV_loss, sign_loss, distance_loss, lamda * (distance_loss / mvl) + (1 - lamda) * (WV_loss + sign_loss)
     return  WV_loss, sign_loss, distance_loss,  (distance_loss / mvl) + (WV_loss + sign_loss)
 
 
@@ -392,7 +381,7 @@ for w in [1]: # window size
             window = w
             batch_size = 2000
             embedding_size = e
-            learning_rate = 0.0001
+            learning_rate = 0.001
             n_epochs = 3000
             n_arms = 2
             lamda = l
@@ -447,8 +436,8 @@ for w in [1]: # window size
                 t0 = time.time()
                 for batch_idx, all_data in enumerate(data_loader):
 
-                    first_node = [data[0].to(device) for data in all_data]
-                    second_node = [data[1].to(device) for data in all_data]
+                    first_node = [data[0].to(device) for data in all_data] #This is the middle node during the walk
+                    second_node = [data[1].to(device) for data in all_data] # This is the emitter or the receiver node in the walk
                     edge_type = [data[2].to(device) for data in all_data]
 
                     first_node = [torch.reshape(first_node[i], (batch_size, 1)) for i in range(len(first_node))]
