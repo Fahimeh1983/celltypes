@@ -9,6 +9,7 @@ from cell.Word2vec.dataloader import *
 from cell.Word2vec.prepare_vocab import *
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ##############################################
