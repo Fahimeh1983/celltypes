@@ -86,7 +86,7 @@ class EmitterReceiverCoupled(nn.Module):
             [nn.Linear(self.embedding_size + self.n_sign , self.l1_size, bias=True) for i in range(n_arms)])
 
         self.decode1_l2 = nn.ModuleList(
-            [nn.Linear(self.l1_size, self.n_sign + self.n_nodes, bias=True) for i in range(n_arms)])
+            [nn.Linear(self.l1_size,  self.n_nodes, bias=True) for i in range(n_arms)])
 
         # non_linearity
         self.sigmoid = nn.Sigmoid()
@@ -164,11 +164,8 @@ class EmitterReceiverCoupled(nn.Module):
         out = self.decode1_l1[arm](combined_vec)
         out = self.tanh(out)
         out = self.decode1_l2[arm](out)
-        out1 = torch.narrow(out, 1, 0, self.n_nodes)
-        out2 = torch.narrow(out, 1, self.n_nodes, self.n_sign)
-        out1 = self.sigmoid(out1)
-        out2 = self.sigmoid(out2)
-        return out1, out2
+        out = self.sigmoid(out)
+        return out
 
     def forward(self, first_node, second_node, edge_type, index_2_word_tensor):
         '''
@@ -178,18 +175,17 @@ class EmitterReceiverCoupled(nn.Module):
 
         first_second_node_embeddings = [None] * self.n_arms #place holder for first and second nodes coordinates
         output1 = [None] * self.n_arms #place holder for the output of decoder1
-        output2 = [None] * self.n_arms #place holder for the output of decoder2
         all_node_emb = [None] * self.n_arms # place holder for coordinates of all the nodes of the graph
 
         for arm in range(self.n_arms):
             all_emb, first_second_embeddings = self.encoder(first_node[arm], second_node[arm], index_2_word_tensor, arm)
             first_second_node_embeddings[arm] = first_second_embeddings
-            output1[arm], output2[arm] = self.decoder(first_second_node_embeddings[arm], edge_type[arm], arm)
+            output1[arm] = self.decoder(first_second_node_embeddings[arm], edge_type[arm], arm)
             all_node_emb[arm] = all_emb
 
         first_second_node_embeddings[1] = torch.flip(first_second_node_embeddings[1], [1])
 
-        return all_node_emb, first_second_node_embeddings, output1, output2
+        return all_node_emb, first_second_node_embeddings, output1
 
 
 
@@ -212,30 +208,6 @@ def loss_WV(output1, n_arms, n_nodes, first_node):
         target = (first_node[arm] == torch.arange(n_nodes).reshape(1, n_nodes).to(device)).float()
         loss = nn.BCELoss()
         bce_loss[arm] = loss(output1[arm], target)
-
-    return sum(bce_loss)/len(bce_loss)
-
-
-def loss_sign(output2, n_arms, n_sign, edge_type):
-    '''
-    Take the output which is obtained from the decoder, this is basically coordinate of j and we want to predict j again
-    like and autoencoder using BCE loss
-
-    Args:
-        output: output from decoder, this is the output of node j coordinates that is passed through decoder
-        n_arms: number of arms
-        n_nodes: number of total nodes in the graph
-        first_node: index of first node(node in the middle of a walk), in the example above, the index of node j
-    Returns:
-    '''
-
-    bce_loss = [None] * n_arms
-
-    for arm in range(n_arms):
-        # here we convert the index of j to its one-hot representation
-        target = (edge_type[arm] == torch.arange(n_sign).reshape(1, n_sign).to(device)).float()
-        loss = nn.BCELoss()
-        bce_loss[arm] = loss(output2[arm], target)
 
     return sum(bce_loss)/len(bce_loss)
 
@@ -284,7 +256,7 @@ def min_var_loss(first_second_node_embeddings):
     m_v_loss = torch.sqrt(torch.min(vars_j_))
     return torch.sqrt(vars_j_), m_v_loss
 
-def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2, first_second_node_embeddings):
+def total_loss(n_arms, n_nodes, first_node, output1, first_second_node_embeddings):
     '''
     Adding AE loss and the distance loss
     Args:
@@ -300,8 +272,6 @@ def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2,
     '''
     WV_loss = loss_WV(output1, n_arms, n_nodes, first_node)
 
-    sign_loss = loss_sign(output2, n_arms, n_sign, edge_type)
-
     bothmvl, mvl = min_var_loss(first_second_node_embeddings)
 
     if torch.isnan(mvl):
@@ -309,7 +279,7 @@ def total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1, output2,
 
     distance_loss = loss_emitter_receiver_independent(first_second_node_embeddings)
 
-    return  WV_loss, sign_loss, distance_loss,  (distance_loss / mvl) + (WV_loss + sign_loss)
+    return  WV_loss, distance_loss,  (distance_loss / mvl)  +  WV_loss
 
 
 ##############################################
@@ -323,7 +293,7 @@ walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/NPP_GNN_project/d
 # walks = read_list_of_lists_from_csv("/Users/fahimehb/Documents/GNN/dat/walks/jsd/N_1_l_1000_p_1_q_1/walk_row_normal_new_npp_adj.csv")
 
 
-combined_edges = pd.read_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/Signed_edges_version1_50percentile.csv")
+combined_edges = pd.read_csv("/Users/fahimehb/Documents/NPP_GNN_project/dat/Signed_edges_version2_normalized_by_max.csv")
 combined_edges['source'] = combined_edges['source'].astype(str)
 combined_edges['target'] = combined_edges['target'].astype(str)
 signed_edges = {}
@@ -393,7 +363,6 @@ for w in [1]: # window size
 
             training_loss = []
             wv_loss = []
-            sign_loss = []
             dist_loss = []
 
             # training
@@ -412,12 +381,11 @@ for w in [1]: # window size
                     edge_type = [torch.reshape(edge_type[i], (batch_size, 1)) for i in range(len(edge_type))]
 
                     optimizer.zero_grad()
-                    all_node_emb, first_second_node_embeddings, output1, output2 = model(
+                    all_node_emb, first_second_node_embeddings, output1 = model(
                         first_node, second_node, edge_type, torch.tensor([i for i in index_2_word.keys()]).to(device)
                     )
 
-                    wv_l, sign_l, d_loss, loss = total_loss(n_arms, n_nodes, n_sign, first_node, edge_type, output1,
-                                                            output2, first_second_node_embeddings)
+                    wv_l, d_loss, loss = total_loss(n_arms, n_nodes, first_node, output1, first_second_node_embeddings)
 
                     loss.backward()
                     optimizer.step()
@@ -425,14 +393,12 @@ for w in [1]: # window size
 
                 training_loss.append(np.mean(losses))
                 wv_loss.append(wv_l.item())
-                sign_loss.append(sign_l.item())
                 dist_loss.append(d_loss.item())
 
                 #Saving the outputs every 100 epochs
                 print(f'epoch: {epoch + 1}/{n_epochs},'
                       f'loss:{np.mean(losses):.4f},'
                       f'WV:{wv_l:.4f}',
-                      f'sign:{sign_l:.4f}',
                       f'dist:{d_loss:.4f}')
 
                 if ((epoch % 100 == 0)):
@@ -460,9 +426,6 @@ for w in [1]: # window size
 
                     output_filename = prefix + "_WV_loss.csv"
                     utils.write_list_to_csv(path + '/' + output_filename, wv_loss)
-
-                    output_filename = prefix + "_sign_loss.csv"
-                    utils.write_list_to_csv(path + '/' + output_filename, sign_loss)
 
                     output_filename = prefix + "_dist_loss.csv"
                     utils.write_list_to_csv(path + '/' + output_filename, dist_loss)
@@ -495,9 +458,6 @@ for w in [1]: # window size
 
             output_filename = prefix + "_WV_loss.csv"
             utils.write_list_to_csv(path + '/' + output_filename, wv_loss)
-
-            output_filename = prefix + "sign.csv"
-            utils.write_list_to_csv(path + '/' + output_filename, sign_loss)
 
             output_filename = prefix + "_dist_loss.csv"
             utils.write_list_to_csv(path + '/' + output_filename, dist_loss)
