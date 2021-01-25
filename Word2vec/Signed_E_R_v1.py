@@ -301,7 +301,7 @@ signed_edges = {}
 for idx, row in combined_edges.iterrows():
     edge_prob = []
     edge_prob.append(row['norm_weight_I'])
-    edge_prob.append(row['norm_weight_E'])
+    edge_prob.append(row['norm_weight_S'])
     edge_prob.append(row['norm_weight_Q'])
     signed_edges[(row['source'], row['target'])] = edge_prob
 

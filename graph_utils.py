@@ -576,6 +576,9 @@ def mask_allbut_k_percentile_of_each_row(df, percentile):
     that should be kept for that row of df
     '''
     data = df.copy()
+
+    data.index.name = ""
+    data.columns.name = ""
     data.index = data.index.astype(str)
     data.columns = data.columns.astype(str)
 
@@ -588,7 +591,8 @@ def mask_allbut_k_percentile_of_each_row(df, percentile):
 
 
     mask = sorted_column_data.stack().reset_index()
-    mask = mask.rename(columns={"level_0": "index", "level_1": "keep", 0: "column"}, errors="raise")
+    # print(sorted_column_data)
+    mask.columns = ["index", "keep", "column"]
     mask['keep'] = 0
     mask['column'] = mask['column'].astype(str)
     mask['index'] = mask['index'].astype(str)

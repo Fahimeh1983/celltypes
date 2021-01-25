@@ -9,7 +9,7 @@ import utils
 pd.options.display.float_format = '{:,.4f}'.format
 
 
-def Plot_3D(xyz, **kwargs):
+def plot_3D(xyz, **kwargs):
 
     """
     Plot a rotateable 3d plot
@@ -26,7 +26,7 @@ def Plot_3D(xyz, **kwargs):
     """
     theta1 = kwargs.get('theta1', None)
     theta2 = kwargs.get('theta2', None)
-    plot_size = kwargs.get('plot_size', (20, 20))
+    plot_size = kwargs.get('plot_size', (10, 10))
     plot_title = kwargs.get('plot_title', None)
     annotation_col = kwargs.get('annotation_col', None)
 
@@ -180,6 +180,7 @@ def Grid_Heatmap(my_dict):
         v["channel_id"] = k
         v.columns = ["index", "column", "value", "channel_id"]
         data = data.append(pd.DataFrame(v), ignore_index=True)
+    print(data.index)
 
     Facet_Grid_Heatmap(data, "channel_id", len(data.keys()), 5, "index", "column", "value")
     return data
@@ -392,7 +393,7 @@ def plot_polar_source_target_relation(theta, r1, r2=None, **kwargs):
 
 def plot_ER(emitter, receiver, figsize, plot_dim, annotation,  resolution, annotation_label=None, E_color=None,\
             R_color=None, E_marker='o', R_marker='x', xlim=None, ylim=None, zlim=None, E_sublist_to_color=None, \
-            R_sublist_to_color=None, side_by_side=False):
+            R_sublist_to_color=None, side_by_side=False, scatter_point_size=None):
 
     """
     plot right and left embeddings on one plot
@@ -415,6 +416,8 @@ def plot_ER(emitter, receiver, figsize, plot_dim, annotation,  resolution, annot
     side_by_side: if True, plot E and R in two separate plot side by side otherwise it will plot both in the same plot
 
     """
+    if scatter_point_size is None:
+        scatter_point_size = 30
     E = emitter.copy()
     R = receiver.copy()
 
@@ -506,39 +509,39 @@ def plot_ER(emitter, receiver, figsize, plot_dim, annotation,  resolution, annot
     if plot_dim == 3:
         if side_by_side:
             ax = fig.add_subplot(121, projection='3d')
-            ax.scatter(E['Z0'], E['Z1'], E['Z2'], c=E_color, s=30, marker=E_marker, label='E', alpha=1)
+            ax.scatter(E['Z0'], E['Z1'], E['Z2'], c=E_color, s=scatter_point_size, marker=E_marker, label='E', alpha=1)
             print_annotation(annotation, ax, E, plot_dim)
             set_axis_lim(plot_dim, xlim, ylim, zlim)
 
             ax = fig.add_subplot(122, projection='3d')
-            ax.scatter(R['Z0'], R['Z1'], R['Z2'], c=R_color, s=30, marker=R_marker, label='R', alpha=1)
+            ax.scatter(R['Z0'], R['Z1'], R['Z2'], c=R_color, s=scatter_point_size, marker=R_marker, label='R', alpha=1)
             print_annotation(annotation, ax, R, plot_dim)
             set_axis_lim(plot_dim, xlim, ylim, zlim)
 
         else:
             ax = fig.add_subplot(111, projection='3d')
-            ax.scatter(E['Z0'], E['Z1'], E['Z2'], c=E_color, s=30, marker=E_marker, label='E', alpha=1)
-            ax.scatter(R['Z0'], R['Z1'], R['Z2'], c=R_color, s=30, marker=R_marker, label='R', alpha=1)
+            ax.scatter(E['Z0'], E['Z1'], E['Z2'], c=E_color, s=scatter_point_size, marker=E_marker, label='E', alpha=1)
+            ax.scatter(R['Z0'], R['Z1'], R['Z2'], c=R_color, s=scatter_point_size, marker=R_marker, label='R', alpha=1)
             print_annotation(annotation, ax, data, plot_dim)
             set_axis_lim(plot_dim, xlim, ylim, zlim)
 
     else:
         if side_by_side:
             ax = fig.add_subplot(1, 2, 1)
-            ax.scatter(E["Z0"], E["Z1"], c=E_color, s=30, marker=E_marker, label="E", alpha=1)
+            ax.scatter(E["Z0"], E["Z1"], c=E_color, s=scatter_point_size, marker=E_marker, label="E", alpha=1)
             print_annotation(annotation, ax, E, plot_dim)
             set_axis_lim(plot_dim, xlim, ylim, zlim)
 
 
             ax = fig.add_subplot(1, 2, 2)
-            ax.scatter(R["Z0"], R["Z1"], c=R_color, s=30, marker=R_marker, label="R", alpha=1)
+            ax.scatter(R["Z0"], R["Z1"], c=R_color, s=scatter_point_size, marker=R_marker, label="R", alpha=1)
             print_annotation(annotation, ax, R, plot_dim)
             set_axis_lim(plot_dim, xlim, ylim, zlim)
 
         else:
             ax = fig.add_subplot(111)
-            ax.scatter(E['Z0'], E['Z1'], c=E_color, s=30, marker=E_marker, label="E", alpha=1)
-            ax.scatter(R['Z0'], R['Z1'], c=R_color, s=30, marker=R_marker, label="R", alpha=1)
+            ax.scatter(E['Z0'], E['Z1'], c=E_color, s=scatter_point_size, marker=E_marker, label="E", alpha=1)
+            ax.scatter(R['Z0'], R['Z1'], c=R_color, s=scatter_point_size, marker=R_marker, label="R", alpha=1)
             print_annotation(annotation, ax, data, plot_dim)
             set_axis_lim(plot_dim, xlim, ylim, zlim)
 
@@ -546,6 +549,7 @@ def plot_ER(emitter, receiver, figsize, plot_dim, annotation,  resolution, annot
 
     plt.legend()
     plt.show()
+    fig.savefig("/Users/fahimehb/Documents/NPP_GNN_project/dat/fig/2d_umap_emb.pdf")
 
 
 def plot_multiple_dict(mydict, xlabel="epochs", ylabel="nandcg", x_label_rotation=90, order_of_x_values=None):
@@ -585,7 +589,7 @@ def plot_node_average_ndcg(adj, e_to_r, figsize, k):
     '''
 
     fig = plt.figure(figsize=figsize)
-    nodes = [str(i) for i in np.sort([int(j) for j in e_to_r.index.tolist()])]
+    nodes = [j for j in e_to_r.index.tolist()]
     nandcg = {}
     for n in nodes:
 

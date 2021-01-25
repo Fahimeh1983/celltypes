@@ -77,12 +77,13 @@ def summarize_embedding_results(E, R, resolution=None, cldf=None):
     return emit, rece
 
 
-def get_closest_nodes(emb, index, node, topn):
+def get_closest_nodes(emb, coordinate_cols, index, node, topn):
     '''
 
     Parameters
     ----------
     emb:  emb or coordinate for each node
+    coordinate_cols: the columns that emb coordiantes are stored
     index: index of nodes that emb belongs to
     node: the node that you want its closest neighbors
     topn: number of neighbors to print
@@ -91,32 +92,16 @@ def get_closest_nodes(emb, index, node, topn):
     a list of closest nodes to the given node
     '''
 
-    dist = squareform(pdist(emb))
+    my_emb = emb.copy()
+    emb.index = index
+    my_emb = my_emb[coordinate_cols]
+    my_emb.index = index
+    dist = squareform(pdist(my_emb))
     dist = pd.DataFrame(dist, index=index, columns=index)
+    closest_node_ids = dist.loc[node][np.argsort(dist.loc[node])][0:topn]
+    emb.loc[closest_node_ids.index.tolist(), "dist"] = closest_node_ids
 
-    return dist.loc[node][np.argsort(dist.loc[node])][0:topn]
-
-# def get_closest_node_label(emb, index, node, topn, cl_df):
-#     '''
-#
-#     Parameters
-#     ----------
-#     emb
-#     index
-#     node
-#     cl_df
-#     topn
-#
-#     Returns
-#     -------
-#
-#     '''
-#     nn = get_closest_nodes(emb, index, node, topn)
-#     print("closest nodes to :", cl_df.loc[[node]]['cluster_label'][0])
-#     print("------------------------------------------")
-#     print("")
-#     print(cl_df.loc[[i for i in nn]][['cluster_label']])
-#     return cl_df.loc[[i for i in nn]]['cluster_label'].tolist()
+    return emb.loc[closest_node_ids.index.tolist()]
 
 
 def run_procrustes_analysis(df1, df2, cl_df=None):
@@ -489,7 +474,7 @@ def Compute_node_average_ndcg(adj, e_to_r, k):
 
 def get_closest_nodes_info(E_to_R_dist, adjacency, topn, node_id=None, node_label=None, cldf=None, resolution=None, node_action="E"):
     '''
-    Takes the E_to_R_dist matrix and the adj,
+    Takes the E_to_R_dist matrix and the adj and prints the closest Receivers to each emitter and vice versa
     '''
 
     if node_label is not None:

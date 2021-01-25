@@ -169,24 +169,27 @@ def read_npp_interaction_matrices(version, which_layers=None):
     for layer in which_layers:
         path = get_npp_visp_interaction_mat_path(version=version, layer=layer)
         tmp_inter = pd.read_csv(path, index_col="Unnamed: 0")
+        ind = tmp_inter.index.tolist()
+        col = tmp_inter.columns.tolist()
         npp_adj = npp_adj + tmp_inter.values
 
+    npp_adj = pd.DataFrame(npp_adj, index=ind, columns=col)
     return npp_adj
 
-def read_npp_interaction_df(version, which_layers, index=None, columns=None):
-    '''
-    Read the interaction matrices of npp and return the combined adj matrix
-    if which_layer is none then it read all the layers and combine them
-
-    Args:
-    ----
-    which_layers: a list of layer names that we want to read and combine
-    '''
-
-    df = read_npp_interaction_matrices(version, which_layers)
-    df = pd.DataFrame(df, index=index, columns=columns)
-
-    return df
+# def read_npp_interaction_df(version, which_layers, index=None, columns=None):
+#     '''
+#     Read the interaction matrices of npp and return the combined adj matrix
+#     if which_layer is none then it read all the layers and combine them
+#
+#     Args:
+#     ----
+#     which_layers: a list of layer names that we want to read and combine
+#     '''
+#
+#     df = read_npp_interaction_matrices(version, which_layers)
+#     df = pd.DataFrame(df, index=index, columns=columns)
+#
+#     return df
 
 
 #################################################
